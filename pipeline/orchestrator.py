@@ -130,4 +130,4 @@ def run_full_pipeline(
     log(f"Output: {merged_shp}")
     log("=" * 50)
 
-    return merged_shp
+    return merged_shp 
