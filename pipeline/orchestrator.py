@@ -126,7 +126,7 @@ def run_full_pipeline(
 
     update_progress(4, "Complete", 1.0)
     log("\n" + "=" * 50)
-    log("PIPELINE COMPLETE")
+    log("PROCESS COMPLETE")
     log(f"Output: {merged_shp}")
     log("=" * 50)
 

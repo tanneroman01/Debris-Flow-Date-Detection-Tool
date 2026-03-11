@@ -87,7 +87,7 @@ fire_keys = [k for k in fire_db.keys() if not k.startswith("_")] if fire_db else
 # ── Header ──
 st.title("Debris Flow Date Detection Tool")
 st.markdown(
-    "Post-fire debris flow inventory pipeline. Upload your KML with mapped polygons for debris flow/landslide deposits, outlets, initiation points, or other features. Also upload the fire boundary shapefile."
+    "Post-fire debris flow inventory pipeline. Upload your KML with mapped polygons for debris flow/landslide deposits, outlets, initiation points, or other features, as well as a fire boundary shapefile."
     "Provide fire metadata (select from dropdown) and provide your Google Earth Enginge Project ID, and get back a fully attributed shapefile with detected event dates."
 )
 
@@ -101,8 +101,9 @@ with st.sidebar:
         help="Your Google Earth Engine cloud project ID (e.g., 'my-gee-project-12345')",
     )
 
-    st.divider()
+    st.divider() 
     st.subheader("Fire Selection")
+    obs_user = st.text_input("Observer name (OBS_USER)", value="", help="Your name or initials for the OBS_USER field")
 
     use_existing = st.checkbox("Use existing fire from database", value=bool(fire_keys))
 
@@ -190,7 +191,7 @@ if issues:
 # A button to run the tool, disabled if all required inputs aren't there.  
 st.divider()
 
-if st.button("Run Pipeline", type="primary", disabled=not ready, use_container_width=True):
+if st.button("Run Tool", type="primary", disabled=not ready, use_container_width=True):
     # Create temp working directory
     work_dir = tempfile.mkdtemp(prefix="dbflow_")
     upload_dir = os.path.join(work_dir, "uploads")
@@ -208,11 +209,17 @@ if st.button("Run Pipeline", type="primary", disabled=not ready, use_container_w
 
     # If fire key not in database, create a temporary fire_defaults with user inputs
     if use_existing and fire_db:
+        patched_db = dict(fire_db) # shallow copy
+        patched_db["_constants"] = dict(patched_db.get("_constants", {})) 
+        patched_db["_constants"]["OBS_USER"] = obs_user
+        fd_path = os.path.join(upload_dir, "fire_defaults.json")
+        with open(fd_path, "w") as f:
+            json.dump(patched_db, f, indent=2)
         fd_path = FIRE_DEFAULTS_PATH
     else:
         temp_db = {
             "_constants": fire_db.get("_constants", {}) if fire_db else {
-                "OBS_USER": "",
+                "OBS_USER": obs_user,
                 "COUNTRY": "United States",
                 "STATE": "",
                 "HAZ_TYPE": "Channelized Sediment Flow",
