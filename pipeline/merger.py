@@ -60,6 +60,15 @@ def run(
             matched = merged[available[0]].notna().sum()
             log(f"  {matched} / {len(merged)} points matched to a date record")
 
+    # change HAZ_TYPE value based on name in PT_TYPE
+    LANDSLIDE_KEYWORDS = ["landslide", "land", "slide", "ls"]
+    def classify_haz_type(row):
+        name = str(row[points_name_field]).lower()
+        if any(kw in name for kw in LANDSLIDE_KEYWORDS):
+            return "Landslide-Generated Debris Flow"
+        return "Channelized Sediment Flow"
+    merged["HAZ_TYPE"] = merged.apply(classify_haz_type, axis=1)
+
     # Add lat/lon
     wgs = merged.to_crs("EPSG:4326")
     merged["LONGITUDE"] = wgs.geometry.x.round(6)
