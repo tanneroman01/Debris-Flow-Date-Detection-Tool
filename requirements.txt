@@ -1,0 +1,10 @@
+streamlit>=1.30.0
+geopandas>=0.14.0
+pandas>=2.0.0
+numpy>=1.24.0
+shapely>=2.0.0
+python-dateutil>=2.8.0
+tqdm>=4.60.0
+earthengine-api>=0.1.370
+pyproj>=3.6.0
+pyogrio>=0.7.0
