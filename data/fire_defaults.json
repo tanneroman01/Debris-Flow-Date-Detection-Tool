@@ -1,0 +1,1830 @@
+{
+    "_note": "Constants apply to every fire. Per-fire entries supply only FIRENAME, FIRE_YEAR, and IGN_DATE. Keys must match the folder names under Hazard Mapping exactly. Mark unknown IGN_DATEs as TODO and fill them in before running.",
+
+    "_constants": {
+        "OBS_USER":   "Tanner Oman",
+        "COUNTRY":    "United States",
+        "STATE":      "Colorado",
+        "HAZ_TYPE":   "Channelized Sediment Flow",
+        "ID_METHOD":  "Satellite Imagery",
+        "FIRE_SRC":   "MTBS"
+    },
+
+    "CAMERONPEAK2020": {
+        "FIRENAME":  "Cameron Peak",
+        "FIRE_YEAR": "2020",
+        "IGN_DATE":  "08/13/2020"
+    },
+
+    "DECKER2019": {
+        "FIRENAME":  "Decker",
+        "FIRE_YEAR": "2019",
+        "IGN_DATE":  "09/08/2019"
+    },
+
+    "DRYLAKE2023": {
+        "FIRENAME":  "Dry Lake",
+        "FIRE_YEAR": "2023",
+        "IGN_DATE":  "08/01/2023"
+    },
+
+    "FOURSIXTEEN2018": {
+        "FIRENAME":  "416",
+        "FIRE_YEAR": "2018",
+        "IGN_DATE":  "06/01/2018"
+    },
+
+    "HAYDENPASS2016": {
+        "FIRENAME":  "Hayden Pass",
+        "FIRE_YEAR": "2016",
+        "IGN_DATE":  "07/08/2016"
+    },
+
+    "LOWLINE2023": {
+        "FIRENAME":  "Lowline",
+        "FIRE_YEAR": "2023",
+        "IGN_DATE":  "07/26/2023"
+    },
+
+    "MULLEN 2020": {
+        "FIRENAME":  "Mullen",
+        "FIRE_YEAR": "2020",
+        "IGN_DATE":  "09/17/2020"
+    },
+
+    "PAPOOSE2013": {
+        "FIRENAME":  "Papoose",
+        "FIRE_YEAR": "2013",
+        "IGN_DATE":  "06/20/2013"
+    },
+
+    "PINEGULCH2020": {
+        "FIRENAME":  "Pine Gulch",
+        "FIRE_YEAR": "2020",
+        "IGN_DATE":  "07/31/2020"
+    },
+
+    "SPINGCREEK2018": {
+        "FIRENAME":  "Spring Creek",
+        "FIRE_YEAR": "2018",
+        "IGN_DATE":  "06/27/2018"
+    },
+
+    "TRAILSPRINGS2023": {
+        "FIRENAME":  "Trail Springs",
+        "FIRE_YEAR": "2023",
+        "IGN_DATE":  "10/19/2023"
+    },
+
+    "WESTFORK2013": {
+        "FIRENAME":  "West Fork Complex",
+        "FIRE_YEAR": "2013",
+        "IGN_DATE":  "06/05/2013"
+    },
+
+    "EASTTROUBLESOME2020": {
+        "FIRENAME":  "East Troublesome",
+        "FIRE_YEAR": "2020",
+        "IGN_DATE":  "10/14/2020"
+    },
+
+    "HAYMAN2002": {
+        "FIRENAME":  "Hayman",
+        "FIRE_YEAR": "2002",
+        "IGN_DATE":  "06/08/2002"
+    },
+
+    "HIGHPARK2012": {
+        "FIRENAME":  "High Park",
+        "FIRE_YEAR": "2012",
+        "IGN_DATE":  "06/09/2012"
+    },
+
+    "MISSIONARYRIDGE2002": {
+        "FIRENAME":  "Missionary Ridge",
+        "FIRE_YEAR": "2002",
+        "IGN_DATE":  "06/09/2002"
+    },
+
+    "BADGERHOLE2018": {
+        "FIRENAME":  "Badger Hole",
+        "FIRE_YEAR": "2018",
+        "IGN_DATE":  "04/17/2018"
+    },
+
+    "BRIDGER2008": {
+        "FIRENAME":  "Bridger",
+        "FIRE_YEAR": "2008",
+        "IGN_DATE":  "06/07/2008"
+    },
+
+    "BEAVERCREEK2016": {
+        "FIRENAME":  "Beaver Creek",
+        "FIRE_YEAR": "2016",
+        "IGN_DATE":  "06/19/2016"
+    },
+
+    "BULLDRAW2018": {
+        "FIRENAME":  "Bull Draw",
+        "FIRE_YEAR": "2018",
+        "IGN_DATE":  "07/29/2018"
+    },
+
+    "BEARSPRINGSCALLIEMARIE2011": {
+        "FIRENAME":  "Bear Springs Callie Marie",
+        "FIRE_YEAR": "2011",
+        "IGN_DATE":  "06/05/2011"
+    },
+
+    "WESTFORKCOMPLEXEASTZONE2013": {
+        "FIRENAME":  "West Fork Complex - East Zone",
+        "FIRE_YEAR": "2013",
+        "IGN_DATE":  "06/05/2013"
+    },
+
+    "GRIZZLYCREEK2020": {
+        "FIRENAME":  "Grizzly Creek",
+        "FIRE_YEAR": "2020",
+        "IGN_DATE":  "08/10/2020"
+    },
+
+    "BURNCANYON2002": {
+        "FIRENAME":  "Burn Canyon",
+        "FIRE_YEAR": "2002",
+        "IGN_DATE":  "07/09/2002"
+    },
+
+    "LOGAN2017": {
+        "FIRENAME":  "Logan",
+        "FIRE_YEAR": "2017",
+        "IGN_DATE":  "03/06/2017"
+    },
+
+    "RYAN2018": {
+        "FIRENAME":  "Ryan",
+        "FIRE_YEAR": "2018",
+        "IGN_DATE":  "09/15/2018"
+    },
+
+    "MAYBERRY2008": {
+        "FIRENAME":  "Mayberry",
+        "FIRE_YEAR": "2008",
+        "IGN_DATE":  "08/24/2008"
+    },
+
+    "LITTLESAND2012": {
+        "FIRENAME":  "Little Sand",
+        "FIRE_YEAR": "2012",
+        "IGN_DATE":  "05/13/2012"
+    },
+
+    "SPRING2002": {
+        "FIRENAME":  "Spring",
+        "FIRE_YEAR": "2002",
+        "IGN_DATE":  "06/01/2002"
+    },
+
+    "BIRCHER2000": {
+        "FIRENAME":  "Bircher",
+        "FIRE_YEAR": "2000",
+        "IGN_DATE":  "07/20/2000"
+    },
+
+    "MIDDLEFORK2020": {
+        "FIRENAME":  "Middle Fork",
+        "FIRE_YEAR": "2020",
+        "IGN_DATE":  "09/06/2020"
+    },
+
+    "SILVERCREEK2018": {
+        "FIRENAME":  "Silver Creek",
+        "FIRE_YEAR": "2018",
+        "IGN_DATE":  "07/19/2018"
+    },
+
+    "DIVIDE2018": {
+        "FIRENAME":  "Divide",
+        "FIRE_YEAR": "2018",
+        "IGN_DATE":  "06/29/2018"
+    },
+
+    "ALKALI2014": {
+        "FIRENAME":  "Alkali",
+        "FIRE_YEAR": "2014",
+        "IGN_DATE":  "07/23/2014"
+    },
+
+    "WALDOCANYON2012": {
+        "FIRENAME":  "Waldo Canyon",
+        "FIRE_YEAR": "2012",
+        "IGN_DATE":  "06/23/2012"
+    },
+
+    "IMPACTAREA2016": {
+        "FIRENAME":  "Impact Area",
+        "FIRE_YEAR": "2016",
+        "IGN_DATE":  "01/28/2016"
+    },
+
+    "PLATEAU2018": {
+        "FIRENAME":  "Plateau",
+        "FIRE_YEAR": "2018",
+        "IGN_DATE":  "07/22/2018"
+    },
+
+    "JUNKINS2016": {
+        "FIRENAME":  "Junkins",
+        "FIRE_YEAR": "2016",
+        "IGN_DATE":  "10/17/2016"
+    },
+
+    "LASTCHANCE2012": {
+        "FIRENAME":  "Last Chance",
+        "FIRE_YEAR": "2012",
+        "IGN_DATE":  "06/25/2012"
+    },
+
+    "DEADDOG2017": {
+        "FIRENAME":  "Dead Dog",
+        "FIRE_YEAR": "2017",
+        "IGN_DATE":  "06/11/2017"
+    },
+
+    "MTZIRKELCOMPLEXHINMAN2002": {
+        "FIRENAME":  "Mt. Zirkel Complex (Hinman)",
+        "FIRE_YEAR": "2002",
+        "IGN_DATE":  "07/12/2002"
+    },
+
+    "BIGFISH2002": {
+        "FIRENAME":  "Big Fish",
+        "FIRE_YEAR": "2002",
+        "IGN_DATE":  "07/19/2002"
+    },
+
+    "MTZIRKELCOMPLEXBURNRIDGE2002": {
+        "FIRENAME":  "Mt. Zirkel Complex (Burn Ridge)",
+        "FIRE_YEAR": "2002",
+        "IGN_DATE":  "08/12/2002"
+    },
+
+    "WILLIAMSFORK2020": {
+        "FIRENAME":  "Williams Fork",
+        "FIRE_YEAR": "2020",
+        "IGN_DATE":  "08/14/2020"
+    },
+
+    "SHELLCOMPLEX2011": {
+        "FIRENAME":  "Shell Complex",
+        "FIRE_YEAR": "2011",
+        "IGN_DATE":  "06/07/2011"
+    },
+
+    "PINERIDGE2012": {
+        "FIRENAME":  "Pine Ridge",
+        "FIRE_YEAR": "2012",
+        "IGN_DATE":  "06/27/2012"
+    },
+
+    "WESTONPASS2018": {
+        "FIRENAME":  "Weston Pass",
+        "FIRE_YEAR": "2018",
+        "IGN_DATE":  "06/28/2018"
+    },
+
+    "MATOVEGA2006": {
+        "FIRENAME":  "Mato Vega",
+        "FIRE_YEAR": "2006",
+        "IGN_DATE":  "06/18/2006"
+    },
+
+    "OILSPRINGS2021": {
+        "FIRENAME":  "Oil Springs",
+        "FIRE_YEAR": "2021",
+        "IGN_DATE":  "06/19/2021"
+    },
+
+    "LAKECHRISTINE2018": {
+        "FIRENAME":  "Lake Christine",
+        "FIRE_YEAR": "2018",
+        "IGN_DATE":  "07/03/2018"
+    },
+
+    "FTLYONS2011": {
+        "FIRENAME":  "Ft. Lyons",
+        "FIRE_YEAR": "2011",
+        "IGN_DATE":  "04/07/2011"
+    },
+
+    "COALSEAM2002": {
+        "FIRENAME":  "Coal Seam",
+        "FIRE_YEAR": "2002",
+        "IGN_DATE":  "06/08/2002"
+    },
+
+    "PEEKABOO2017": {
+        "FIRENAME":  "Peekaboo",
+        "FIRE_YEAR": "2017",
+        "IGN_DATE":  "06/27/2017"
+    },
+
+    "BLACKFOREST2013": {
+        "FIRENAME":  "Black Forest",
+        "FIRE_YEAR": "2013",
+        "IGN_DATE":  "06/11/2013"
+    },
+
+    "CHERRYCANYON2020": {
+        "FIRENAME":  "Cherry Canyon",
+        "FIRE_YEAR": "2020",
+        "IGN_DATE":  "05/20/2020"
+    },
+
+    "MASON2005": {
+        "FIRENAME":  "Mason",
+        "FIRE_YEAR": "2005",
+        "IGN_DATE":  "07/06/2005"
+    },
+
+    "WEBER2012": {
+        "FIRENAME":  "Weber",
+        "FIRE_YEAR": "2012",
+        "IGN_DATE":  "06/22/2012"
+    },
+
+    "SPRINGCREEK2002": {
+        "FIRENAME":  "Spring Creek",
+        "FIRE_YEAR": "2002",
+        "IGN_DATE":  "06/22/2002"
+    },
+
+    "BOBCAT2000": {
+        "FIRENAME":  "Bobcat",
+        "FIRE_YEAR": "2000",
+        "IGN_DATE":  "06/12/2000"
+    },
+
+    "RABBIT222018": {
+        "FIRENAME":  "Rabbit 22",
+        "FIRE_YEAR": "2018",
+        "IGN_DATE":  "03/04/2018"
+    },
+
+    "EASTPEAK2013": {
+        "FIRENAME":  "East Peak",
+        "FIRE_YEAR": "2013",
+        "IGN_DATE":  "06/19/2013"
+    },
+
+    "CALWOOD2020": {
+        "FIRENAME":  "Calwood",
+        "FIRE_YEAR": "2020",
+        "IGN_DATE":  "10/17/2020"
+    },
+
+    "HIGHMEADOWS2000": {
+        "FIRENAME":  "High Meadows",
+        "FIRE_YEAR": "2000",
+        "IGN_DATE":  "06/12/2000"
+    },
+
+    "CALLIEMARIE2011": {
+        "FIRENAME":  "Callie Marie",
+        "FIRE_YEAR": "2011",
+        "IGN_DATE":  "06/07/2011"
+    },
+
+    "PICNICROCK2004": {
+        "FIRENAME":  "Picnic Rock",
+        "FIRE_YEAR": "2004",
+        "IGN_DATE":  "03/30/2004"
+    },
+
+    "FURNISH2002": {
+        "FIRENAME":  "Furnish",
+        "FIRE_YEAR": "2002",
+        "IGN_DATE":  "05/15/2002"
+    },
+
+    "WINTERVALLEY2000": {
+        "FIRENAME":  "Winter Valley",
+        "FIRE_YEAR": "2000",
+        "IGN_DATE":  "07/24/2000"
+    },
+
+    "BOONEDRAW2018": {
+        "FIRENAME":  "Boone Draw",
+        "FIRE_YEAR": "2018",
+        "IGN_DATE":  "09/13/2018"
+    },
+
+    "BUSTERFLAT2000": {
+        "FIRENAME":  "Busterflat",
+        "FIRE_YEAR": "2000",
+        "IGN_DATE":  "07/03/2000"
+    },
+
+    "TA252008": {
+        "FIRENAME":  "Ta-25",
+        "FIRE_YEAR": "2008",
+        "IGN_DATE":  "04/16/2008"
+    },
+
+    "ALKALI2010": {
+        "FIRENAME":  "Alkali",
+        "FIRE_YEAR": "2010",
+        "IGN_DATE":  "08/18/2010"
+    },
+
+    "MILLION2002": {
+        "FIRENAME":  "Million",
+        "FIRE_YEAR": "2002",
+        "IGN_DATE":  "06/19/2002"
+    },
+
+    "WINTERVALLEY2017": {
+        "FIRENAME":  "Winter Valley",
+        "FIRE_YEAR": "2017",
+        "IGN_DATE":  "09/21/2017"
+    },
+
+    "NARRAGUINNEP2009": {
+        "FIRENAME":  "Narraguinnep",
+        "FIRE_YEAR": "2009",
+        "IGN_DATE":  "08/07/2009"
+    },
+
+    "IRON2023": {
+        "FIRENAME":  "Iron",
+        "FIRE_YEAR": "2023",
+        "IGN_DATE":  "09/29/2023"
+    },
+
+    "RANGE1352024": {
+        "FIRENAME":  "Range 135",
+        "FIRE_YEAR": "2024",
+        "IGN_DATE":  "02/29/2024"
+    },
+
+    "MORGANCREEK2021": {
+        "FIRENAME":  "Morgan Creek",
+        "FIRE_YEAR": "2021",
+        "IGN_DATE":  "07/09/2021"
+    },
+
+    "HWY942018": {
+        "FIRENAME":  "Hwy 94",
+        "FIRE_YEAR": "2018",
+        "IGN_DATE":  "04/17/2018"
+    },
+
+    "DOECANYON2019": {
+        "FIRENAME":  "Doe Canyon",
+        "FIRE_YEAR": "2019",
+        "IGN_DATE":  "06/20/2019"
+    },
+
+    "MVDPSFRXASST42001": {
+        "FIRENAME":  "Mvd Psfrxasst 4",
+        "FIRE_YEAR": "2001",
+        "IGN_DATE":  "09/26/2001"
+    },
+
+    "JAMESANDJOHN2002": {
+        "FIRENAME":  "James And John",
+        "FIRE_YEAR": "2002",
+        "IGN_DATE":  "06/01/2002"
+    },
+
+    "GREASEWOODWFU2004": {
+        "FIRENAME":  "Greasewood Wfu",
+        "FIRE_YEAR": "2004",
+        "IGN_DATE":  "06/06/2004"
+    },
+
+    "SANDOVAL2001": {
+        "FIRENAME":  "Sandoval",
+        "FIRE_YEAR": "2001",
+        "IGN_DATE":  "05/03/2001"
+    },
+
+    "WOLF2012": {
+        "FIRENAME":  "Wolf",
+        "FIRE_YEAR": "2012",
+        "IGN_DATE":  "08/03/2012"
+    },
+
+    "MILNESQUIRREL2002": {
+        "FIRENAME":  "Milne/Squirrel",
+        "FIRE_YEAR": "2002",
+        "IGN_DATE":  "05/06/2002"
+    },
+
+    "INDIANVALLEY2018": {
+        "FIRENAME":  "Indian Valley",
+        "FIRE_YEAR": "2018",
+        "IGN_DATE":  "07/20/2018"
+    },
+
+    "MARSHALL2021": {
+        "FIRENAME":  "Marshall",
+        "FIRE_YEAR": "2021",
+        "IGN_DATE":  "12/30/2021"
+    },
+
+    "PURGATOIREFIRE2011": {
+        "FIRENAME":  "Purgatoire Fire",
+        "FIRE_YEAR": "2011",
+        "IGN_DATE":  "05/30/2011"
+    },
+
+    "SALT2011": {
+        "FIRENAME":  "Salt",
+        "FIRE_YEAR": "2011",
+        "IGN_DATE":  "06/03/2011"
+    },
+
+    "EIGHTFOURTWO2017": {
+        "FIRENAME":  "Eight Four Two",
+        "FIRE_YEAR": "2017",
+        "IGN_DATE":  "08/02/2017"
+    },
+
+    "SUNRISEMINE2012": {
+        "FIRENAME":  "Sunrise Mine",
+        "FIRE_YEAR": "2012",
+        "IGN_DATE":  "05/25/2012"
+    },
+
+    "LOSTLAKES2002": {
+        "FIRENAME":  "Lost Lakes",
+        "FIRE_YEAR": "2002",
+        "IGN_DATE":  "07/13/2002"
+    },
+
+    "FOURMILECANYON2010": {
+        "FIRENAME":  "Fourmile Canyon",
+        "FIRE_YEAR": "2010",
+        "IGN_DATE":  "09/06/2010"
+    },
+
+    "PRONG2008": {
+        "FIRENAME":  "Prong",
+        "FIRE_YEAR": "2008",
+        "IGN_DATE":  "08/24/2008"
+    },
+
+    "BEULAHHILL2016": {
+        "FIRENAME":  "Beulah Hill",
+        "FIRE_YEAR": "2016",
+        "IGN_DATE":  "10/03/2016"
+    },
+
+    "CABINLAKE2018": {
+        "FIRENAME":  "Cabin Lake",
+        "FIRE_YEAR": "2018",
+        "IGN_DATE":  "07/29/2018"
+    },
+
+    "REDCANYON2018": {
+        "FIRENAME":  "Red Canyon",
+        "FIRE_YEAR": "2018",
+        "IGN_DATE":  "07/29/2018"
+    },
+
+    "ORDWAYCROWLEYCO2008": {
+        "FIRENAME":  "Ordway Crowley Co",
+        "FIRE_YEAR": "2008",
+        "IGN_DATE":  "04/15/2008"
+    },
+
+    "KARVAL2011": {
+        "FIRENAME":  "Karval",
+        "FIRE_YEAR": "2011",
+        "IGN_DATE":  "03/24/2011"
+    },
+
+    "SHERIDANLAKE2022": {
+        "FIRENAME":  "Sheridan Lake",
+        "FIRE_YEAR": "2022",
+        "IGN_DATE":  "04/22/2022"
+    },
+
+    "BURRO2018": {
+        "FIRENAME":  "Burro",
+        "FIRE_YEAR": "2018",
+        "IGN_DATE":  "06/08/2018"
+    },
+
+    "PONY2000": {
+        "FIRENAME":  "Pony",
+        "FIRE_YEAR": "2000",
+        "IGN_DATE":  "08/02/2000"
+    },
+
+    "APACHECOMPLEX2018": {
+        "FIRENAME":  "Apache Complex",
+        "FIRE_YEAR": "2018",
+        "IGN_DATE":  "02/24/2018"
+    },
+
+    "TRINCHERACREEK2018": {
+        "FIRENAME":  "Trinchera Creek",
+        "FIRE_YEAR": "2018",
+        "IGN_DATE":  "04/17/2018"
+    },
+
+    "QUARRY2009": {
+        "FIRENAME":  "Quarry",
+        "FIRE_YEAR": "2009",
+        "IGN_DATE":  "03/03/2009"
+    },
+
+    "LOSTSOLAR2016": {
+        "FIRENAME":  "Lost Solar",
+        "FIRE_YEAR": "2016",
+        "IGN_DATE":  "08/08/2016"
+    },
+
+    "MILNE2017": {
+        "FIRENAME":  "Milne",
+        "FIRE_YEAR": "2017",
+        "IGN_DATE":  "02/27/2017"
+    },
+
+    "EDISON2018": {
+        "FIRENAME":  "Edison",
+        "FIRE_YEAR": "2018",
+        "IGN_DATE":  "04/17/2018"
+    },
+
+    "BEAR2002": {
+        "FIRENAME":  "Bear",
+        "FIRE_YEAR": "2002",
+        "IGN_DATE":  "06/27/2002"
+    },
+
+    "HANOVER2002": {
+        "FIRENAME":  "Hanover",
+        "FIRE_YEAR": "2002",
+        "IGN_DATE":  "05/03/2002"
+    },
+
+    "MEDANO2010": {
+        "FIRENAME":  "Medano",
+        "FIRE_YEAR": "2010",
+        "IGN_DATE":  "06/06/2010"
+    },
+
+    "GAGEBYCREEK2023": {
+        "FIRENAME":  "Gageby Creek",
+        "FIRE_YEAR": "2023",
+        "IGN_DATE":  "04/18/2023"
+    },
+
+    "CARSONMIDWAY2018": {
+        "FIRENAME":  "Carson Midway",
+        "FIRE_YEAR": "2018",
+        "IGN_DATE":  "03/16/2018"
+    },
+
+    "CONEMOUNTAIN2000": {
+        "FIRENAME":  "Cone Mountain",
+        "FIRE_YEAR": "2000",
+        "IGN_DATE":  "07/03/2000"
+    },
+
+    "DUCKETT2011": {
+        "FIRENAME":  "Duckett",
+        "FIRE_YEAR": "2011",
+        "IGN_DATE":  "06/12/2011"
+    },
+
+    "PINETREE2017": {
+        "FIRENAME":  "Pine Tree",
+        "FIRE_YEAR": "2017",
+        "IGN_DATE":  "09/09/2017"
+    },
+
+    "CAMPBELL2004": {
+        "FIRENAME":  "Campbell",
+        "FIRE_YEAR": "2004",
+        "IGN_DATE":  "07/30/2004"
+    },
+
+    "MUDDYSLIDE2021": {
+        "FIRENAME":  "Muddy Slide",
+        "FIRE_YEAR": "2021",
+        "IGN_DATE":  "06/20/2021"
+    },
+
+    "MAURICIOCANYON2006": {
+        "FIRENAME":  "Mauricio Canyon",
+        "FIRE_YEAR": "2006",
+        "IGN_DATE":  "01/07/2006"
+    },
+
+    "BIGELK2002": {
+        "FIRENAME":  "Big Elk",
+        "FIRE_YEAR": "2002",
+        "IGN_DATE":  "07/17/2002"
+    },
+
+    "GREENCREEK2002": {
+        "FIRENAME":  "Green Creek",
+        "FIRE_YEAR": "2002",
+        "IGN_DATE":  "07/14/2002"
+    },
+
+    "COWCREEKRXNORTH2023": {
+        "FIRENAME":  "Cowcreekrxnorth",
+        "FIRE_YEAR": "2023",
+        "IGN_DATE":  "09/27/2023"
+    },
+
+    "LITTLEMESA2023": {
+        "FIRENAME":  "Little Mesa",
+        "FIRE_YEAR": "2023",
+        "IGN_DATE":  "07/31/2023"
+    },
+
+    "NORTHBARCUS2002": {
+        "FIRENAME":  "North Barcus",
+        "FIRE_YEAR": "2002",
+        "IGN_DATE":  "07/30/2002"
+    },
+
+    "THOMAS2006": {
+        "FIRENAME":  "Thomas",
+        "FIRE_YEAR": "2006",
+        "IGN_DATE":  "06/13/2006"
+    },
+
+    "DEEPCREEK2017": {
+        "FIRENAME":  "Deep Creek",
+        "FIRE_YEAR": "2017",
+        "IGN_DATE":  "09/04/2017"
+    },
+
+    "GREATERGRACIARX2016": {
+        "FIRENAME":  "Greater Gracia Rx",
+        "FIRE_YEAR": "2016",
+        "IGN_DATE":  "09/10/2016"
+    },
+
+    "IRONMOUNTAIN2002": {
+        "FIRENAME":  "Iron Mountain",
+        "FIRE_YEAR": "2002",
+        "IGN_DATE":  "06/02/2002"
+    },
+
+    "C342019": {
+        "FIRENAME":  "C34",
+        "FIRE_YEAR": "2019",
+        "IGN_DATE":  "02/13/2019"
+    },
+
+    "LONETREE2007": {
+        "FIRENAME":  "Lone Tree",
+        "FIRE_YEAR": "2007",
+        "IGN_DATE":  "08/22/2007"
+    },
+
+    "SCANDARD2000": {
+        "FIRENAME":  "Scandard",
+        "FIRE_YEAR": "2000",
+        "IGN_DATE":  "07/22/2000"
+    },
+
+    "WEST2021": {
+        "FIRENAME":  "West",
+        "FIRE_YEAR": "2021",
+        "IGN_DATE":  "06/20/2021"
+    },
+
+    "BIJOU2021": {
+        "FIRENAME":  "Bijou",
+        "FIRE_YEAR": "2021",
+        "IGN_DATE":  "08/28/2021"
+    },
+
+    "SYLVAN2021": {
+        "FIRENAME":  "Sylvan",
+        "FIRE_YEAR": "2021",
+        "IGN_DATE":  "06/20/2021"
+    },
+
+    "LOWERNORTHFORKFIRE2012": {
+        "FIRENAME":  "Lower North Fork Fire",
+        "FIRE_YEAR": "2012",
+        "IGN_DATE":  "03/26/2012"
+    },
+
+    "DEERCANYON2020": {
+        "FIRENAME":  "Deer Canyon",
+        "FIRE_YEAR": "2020",
+        "IGN_DATE":  "06/07/2020"
+    },
+
+    "MELLEN2009": {
+        "FIRENAME":  "Mellen",
+        "FIRE_YEAR": "2009",
+        "IGN_DATE":  "08/07/2009"
+    },
+
+    "FAWNCREEK2020": {
+        "FIRENAME":  "Fawn Creek",
+        "FIRE_YEAR": "2020",
+        "IGN_DATE":  "07/13/2020"
+    },
+
+    "DIVIDE2006": {
+        "FIRENAME":  "Divide",
+        "FIRE_YEAR": "2006",
+        "IGN_DATE":  "07/13/2006"
+    },
+
+    "WINDSPLITTER2017": {
+        "FIRENAME":  "Windsplitter",
+        "FIRE_YEAR": "2017",
+        "IGN_DATE":  "12/08/2017"
+    },
+
+    "ROYALGORGE2013": {
+        "FIRENAME":  "Royal Gorge",
+        "FIRE_YEAR": "2013",
+        "IGN_DATE":  "06/11/2013"
+    },
+
+    "SPRINGCREEK2023": {
+        "FIRENAME":  "Spring Creek",
+        "FIRE_YEAR": "2023",
+        "IGN_DATE":  "06/24/2023"
+    },
+
+    "CR152022": {
+        "FIRENAME":  "Cr 15",
+        "FIRE_YEAR": "2022",
+        "IGN_DATE":  "10/22/2022"
+    },
+
+    "DOMINGUEZ2009": {
+        "FIRENAME":  "Dominguez",
+        "FIRE_YEAR": "2009",
+        "IGN_DATE":  "07/11/2009"
+    },
+
+    "OVERLAND2003": {
+        "FIRENAME":  "Overland",
+        "FIRE_YEAR": "2003",
+        "IGN_DATE":  "10/30/2003"
+    },
+
+    "HUNT2019": {
+        "FIRENAME":  "Hunt",
+        "FIRE_YEAR": "2019",
+        "IGN_DATE":  "09/05/2019"
+    },
+
+    "OLDSTAGE2009": {
+        "FIRENAME":  "Old Stage",
+        "FIRE_YEAR": "2009",
+        "IGN_DATE":  "01/07/2009"
+    },
+
+    "EASTCANYON2020": {
+        "FIRENAME":  "East Canyon",
+        "FIRE_YEAR": "2020",
+        "IGN_DATE":  "06/14/2020"
+    },
+
+    "MCGRUDER2004": {
+        "FIRENAME":  "Mcgruder",
+        "FIRE_YEAR": "2004",
+        "IGN_DATE":  "07/03/2004"
+    },
+
+    "PACKTRAILWFU2005": {
+        "FIRENAME":  "Pack Trail Wfu",
+        "FIRE_YEAR": "2005",
+        "IGN_DATE":  "07/07/2005"
+    },
+
+    "RANGE52018": {
+        "FIRENAME":  "Range 5",
+        "FIRE_YEAR": "2018",
+        "IGN_DATE":  "04/08/2018"
+    },
+
+    "BIGRED2017": {
+        "FIRENAME":  "Big Red",
+        "FIRE_YEAR": "2017",
+        "IGN_DATE":  "08/19/2017"
+    },
+
+    "CRYSTALFIRE2011": {
+        "FIRENAME":  "Crystal Fire",
+        "FIRE_YEAR": "2011",
+        "IGN_DATE":  "04/01/2011"
+    },
+
+    "SCHOONOVER2002": {
+        "FIRENAME":  "Schoonover",
+        "FIRE_YEAR": "2002",
+        "IGN_DATE":  "05/22/2002"
+    },
+
+    "GREASEWOOD2000": {
+        "FIRENAME":  "Greasewood",
+        "FIRE_YEAR": "2000",
+        "IGN_DATE":  "07/25/2000"
+    },
+
+    "VALLECITO2012": {
+        "FIRENAME":  "Vallecito",
+        "FIRE_YEAR": "2012",
+        "IGN_DATE":  "10/12/2012"
+    },
+
+    "PSFRXASST12000": {
+        "FIRENAME":  "Psfrxasst1",
+        "FIRE_YEAR": "2000",
+        "IGN_DATE":  "04/09/2000"
+    },
+
+    "HAMILTON2000": {
+        "FIRENAME":  "Hamilton",
+        "FIRE_YEAR": "2000",
+        "IGN_DATE":  "08/06/2000"
+    },
+
+    "CACHECREEK2018": {
+        "FIRENAME":  "Cache Creek",
+        "FIRE_YEAR": "2018",
+        "IGN_DATE":  "07/28/2018"
+    },
+
+    "FORTLYONS2022": {
+        "FIRENAME":  "Fort Lyons",
+        "FIRE_YEAR": "2022",
+        "IGN_DATE":  "04/12/2022"
+    },
+
+    "MUDSPRINGS2007": {
+        "FIRENAME":  "Mud Springs",
+        "FIRE_YEAR": "2007",
+        "IGN_DATE":  "08/13/2007"
+    },
+
+    "LONGMESA2002": {
+        "FIRENAME":  "Long Mesa",
+        "FIRE_YEAR": "2002",
+        "IGN_DATE":  "07/29/2002"
+    },
+
+    "QUARTZRIDGE2023": {
+        "FIRENAME":  "Quartz Ridge",
+        "FIRE_YEAR": "2023",
+        "IGN_DATE":  "08/05/2023"
+    },
+
+    "MIRACLECOMPLEX2002": {
+        "FIRENAME":  "Miracle Complex",
+        "FIRE_YEAR": "2002",
+        "IGN_DATE":  "06/08/2002"
+    },
+
+    "BRADFIELD2009": {
+        "FIRENAME":  "Bradfield",
+        "FIRE_YEAR": "2009",
+        "IGN_DATE":  "08/02/2009"
+    },
+
+    "FERNLAKE2012": {
+        "FIRENAME":  "Fern Lake",
+        "FIRE_YEAR": "2012",
+        "IGN_DATE":  "10/09/2012"
+    },
+
+    "EASTJORDANRX2009": {
+        "FIRENAME":  "East Jordan Rx",
+        "FIRE_YEAR": "2009",
+        "IGN_DATE":  "04/21/2009"
+    },
+
+    "ALLRED2009": {
+        "FIRENAME":  "Allred",
+        "FIRE_YEAR": "2009",
+        "IGN_DATE":  "08/03/2009"
+    },
+
+    "BEAVER2010": {
+        "FIRENAME":  "Beaver",
+        "FIRE_YEAR": "2010",
+        "IGN_DATE":  "05/22/2010"
+    },
+
+    "FF2022": {
+        "FIRENAME":  "Ff",
+        "FIRE_YEAR": "2022",
+        "IGN_DATE":  "04/22/2022"
+    },
+
+    "PUMKINCENTER2016": {
+        "FIRENAME":  "Pumkin Center",
+        "FIRE_YEAR": "2016",
+        "IGN_DATE":  "02/19/2016"
+    },
+
+    "YOUNGHOLLOW2011": {
+        "FIRENAME":  "Young Hollow",
+        "FIRE_YEAR": "2011",
+        "IGN_DATE":  "06/29/2011"
+    },
+
+    "BOLT2003": {
+        "FIRENAME":  "Bolt",
+        "FIRE_YEAR": "2003",
+        "IGN_DATE":  "07/26/2003"
+    },
+
+    "PINYONRIDGE2002": {
+        "FIRENAME":  "Pinyon Ridge",
+        "FIRE_YEAR": "2002",
+        "IGN_DATE":  "06/22/2002"
+    },
+
+    "SIERRAVISTA2011": {
+        "FIRENAME":  "Sierra Vista",
+        "FIRE_YEAR": "2011",
+        "IGN_DATE":  "02/19/2011"
+    },
+
+    "TRAILEAST2005": {
+        "FIRENAME":  "Trail East",
+        "FIRE_YEAR": "2005",
+        "IGN_DATE":  "07/14/2005"
+    },
+
+    "MOCCASIN2003": {
+        "FIRENAME":  "Moccasin",
+        "FIRE_YEAR": "2003",
+        "IGN_DATE":  "07/15/2003"
+    },
+
+    "WETMORE2012": {
+        "FIRENAME":  "Wetmore",
+        "FIRE_YEAR": "2012",
+        "IGN_DATE":  "10/23/2012"
+    },
+
+    "TESTCENTER2018": {
+        "FIRENAME":  "Test Center",
+        "FIRE_YEAR": "2018",
+        "IGN_DATE":  "05/27/2018"
+    },
+
+    "BUCKTAIL2002": {
+        "FIRENAME":  "Bucktail",
+        "FIRE_YEAR": "2002",
+        "IGN_DATE":  "05/20/2002"
+    },
+
+    "G182019": {
+        "FIRENAME":  "G18",
+        "FIRE_YEAR": "2019",
+        "IGN_DATE":  "10/27/2019"
+    },
+
+    "ECKLUND2001": {
+        "FIRENAME":  "Ecklund",
+        "FIRE_YEAR": "2001",
+        "IGN_DATE":  "07/17/2001"
+    },
+
+    "SUNDAYFIRE2020": {
+        "FIRENAME":  "Sunday Fire",
+        "FIRE_YEAR": "2020",
+        "IGN_DATE":  "07/19/2020"
+    },
+
+    "CATTLEDRIVE2017": {
+        "FIRENAME":  "Cattle Drive",
+        "FIRE_YEAR": "2017",
+        "IGN_DATE":  "03/04/2017"
+    },
+
+    "BITTERBRUSH2006": {
+        "FIRENAME":  "Bitter Brush",
+        "FIRE_YEAR": "2006",
+        "IGN_DATE":  "08/22/2006"
+    },
+
+    "REDFEATHERRX2018": {
+        "FIRENAME":  "Red Feather Rx",
+        "FIRE_YEAR": "2018",
+        "IGN_DATE":  "03/16/2018"
+    },
+
+    "TAYLOR2000": {
+        "FIRENAME":  "Taylor",
+        "FIRE_YEAR": "2000",
+        "IGN_DATE":  "05/28/2000"
+    },
+
+    "DOMINGUEZ2010": {
+        "FIRENAME":  "Dominguez",
+        "FIRE_YEAR": "2010",
+        "IGN_DATE":  "07/12/2010"
+    },
+
+    "HASWELL2022": {
+        "FIRENAME":  "Haswell",
+        "FIRE_YEAR": "2022",
+        "IGN_DATE":  "04/22/2022"
+    },
+
+    "SNAKING2002": {
+        "FIRENAME":  "Snaking",
+        "FIRE_YEAR": "2002",
+        "IGN_DATE":  "04/23/2002"
+    },
+
+    "COUNTYROADR2022": {
+        "FIRENAME":  "County Road R",
+        "FIRE_YEAR": "2022",
+        "IGN_DATE":  "04/22/2022"
+    },
+
+    "BULLHILL2001": {
+        "FIRENAME":  "Bull Hill",
+        "FIRE_YEAR": "2001",
+        "IGN_DATE":  "07/10/2001"
+    },
+
+    "JELLY2001": {
+        "FIRENAME":  "Jelly",
+        "FIRE_YEAR": "2001",
+        "IGN_DATE":  "08/12/2001"
+    },
+
+    "MANVEL2023": {
+        "FIRENAME":  "Manvel",
+        "FIRE_YEAR": "2023",
+        "IGN_DATE":  "03/22/2023"
+    },
+
+    "GRASSLANDSCOMPLEX2019": {
+        "FIRENAME":  "Grasslands Complex",
+        "FIRE_YEAR": "2019",
+        "IGN_DATE":  "07/18/2019"
+    },
+
+    "HAYNESCREEK2008": {
+        "FIRENAME":  "Haynes Creek",
+        "FIRE_YEAR": "2008",
+        "IGN_DATE":  "10/02/2008"
+    },
+
+    "SAND2000": {
+        "FIRENAME":  "Sand",
+        "FIRE_YEAR": "2000",
+        "IGN_DATE":  "04/18/2000"
+    },
+
+    "CITADEL2013": {
+        "FIRENAME":  "Citadel",
+        "FIRE_YEAR": "2013",
+        "IGN_DATE":  "07/21/2013"
+    },
+
+    "SULLIVANPARK2016": {
+        "FIRENAME":  "Sullivan Park",
+        "FIRE_YEAR": "2016",
+        "IGN_DATE":  "02/20/2016"
+    },
+
+    "CORD1282016": {
+        "FIRENAME":  "Co Rd 128",
+        "FIRE_YEAR": "2016",
+        "IGN_DATE":  "02/18/2016"
+    },
+
+    "BEARCREEKWFU2003": {
+        "FIRENAME":  "Bear Creek Wfu",
+        "FIRE_YEAR": "2003",
+        "IGN_DATE":  "07/06/2003"
+    },
+
+    "COUNTYROAD562018": {
+        "FIRENAME":  "County Road 56",
+        "FIRE_YEAR": "2018",
+        "IGN_DATE":  "04/04/2018"
+    },
+
+    "THREEMILECREEKRX2023": {
+        "FIRENAME":  "Threemile Creek Rx",
+        "FIRE_YEAR": "2023",
+        "IGN_DATE":  "09/15/2023"
+    },
+
+    "HAMILTON2003": {
+        "FIRENAME":  "Hamilton",
+        "FIRE_YEAR": "2003",
+        "IGN_DATE":  "07/19/2003"
+    },
+
+    "7452020": {
+        "FIRENAME":  "74.5",
+        "FIRE_YEAR": "2020",
+        "IGN_DATE":  "05/16/2020"
+    },
+
+    "THORNBURG2018": {
+        "FIRENAME":  "Thornburg",
+        "FIRE_YEAR": "2018",
+        "IGN_DATE":  "07/06/2018"
+    },
+
+    "STREETER2020": {
+        "FIRENAME":  "Streeter",
+        "FIRE_YEAR": "2020",
+        "IGN_DATE":  "07/07/2020"
+    },
+
+    "4032023": {
+        "FIRENAME":  "403",
+        "FIRE_YEAR": "2023",
+        "IGN_DATE":  "03/30/2023"
+    },
+
+    "EASTFORK2020": {
+        "FIRENAME":  "East Fork",
+        "FIRE_YEAR": "2020",
+        "IGN_DATE":  "08/22/2020"
+    },
+
+    "1042024": {
+        "FIRENAME":  "104",
+        "FIRE_YEAR": "2024",
+        "IGN_DATE":  "07/28/2024"
+    },
+
+    "RXMILLERCREEKHAYFLATS2016": {
+        "FIRENAME":  "Rx Miller Creek-Hay Flats",
+        "FIRE_YEAR": "2016",
+        "IGN_DATE":  "03/29/2016"
+    },
+
+    "COSGROVE2011": {
+        "FIRENAME":  "Cosgrove",
+        "FIRE_YEAR": "2011",
+        "IGN_DATE":  "08/07/2011"
+    },
+
+    "MSR22016": {
+        "FIRENAME":  "Msr 2",
+        "FIRE_YEAR": "2016",
+        "IGN_DATE":  "03/17/2016"
+    },
+
+    "LONGDRAW2016": {
+        "FIRENAME":  "Long Draw",
+        "FIRE_YEAR": "2016",
+        "IGN_DATE":  "06/21/2016"
+    },
+
+    "BLACKHILLS2022": {
+        "FIRENAME":  "Black Hills",
+        "FIRE_YEAR": "2022",
+        "IGN_DATE":  "06/17/2022"
+    },
+
+    "BENTSFORT2022": {
+        "FIRENAME":  "Bents Fort",
+        "FIRE_YEAR": "2022",
+        "IGN_DATE":  "04/12/2022"
+    },
+
+    "BLACKBRIDGE2019": {
+        "FIRENAME":  "Black Bridge",
+        "FIRE_YEAR": "2019",
+        "IGN_DATE":  "04/04/2019"
+    },
+
+    "VILLEGREENFIRE2020": {
+        "FIRENAME":  "Villegreen Fire",
+        "FIRE_YEAR": "2020",
+        "IGN_DATE":  "05/18/2020"
+    },
+
+    "SPRINGER2012": {
+        "FIRENAME":  "Springer",
+        "FIRE_YEAR": "2012",
+        "IGN_DATE":  "06/17/2012"
+    },
+
+    "SWITCHBACK2000": {
+        "FIRENAME":  "Switchback",
+        "FIRE_YEAR": "2000",
+        "IGN_DATE":  "07/20/2000"
+    },
+
+    "INDIANGULCHFIRE2011": {
+        "FIRENAME":  "Indian Gulch Fire",
+        "FIRE_YEAR": "2011",
+        "IGN_DATE":  "03/20/2011"
+    },
+
+    "RANGE1532024": {
+        "FIRENAME":  "Range 153",
+        "FIRE_YEAR": "2024",
+        "IGN_DATE":  "02/25/2024"
+    },
+
+    "472002": {
+        "FIRENAME":  "47",
+        "FIRE_YEAR": "2002",
+        "IGN_DATE":  "05/20/2002"
+    },
+
+    "HIGHPARK2022": {
+        "FIRENAME":  "High Park",
+        "FIRE_YEAR": "2022",
+        "IGN_DATE":  "05/12/2022"
+    },
+
+    "BEAR2007": {
+        "FIRENAME":  "Bear",
+        "FIRE_YEAR": "2007",
+        "IGN_DATE":  "07/08/2007"
+    },
+
+    "LIONCREEK2006": {
+        "FIRENAME":  "Lion Creek",
+        "FIRE_YEAR": "2006",
+        "IGN_DATE":  "06/20/2006"
+    },
+
+    "SHAMROCK2020": {
+        "FIRENAME":  "Shamrock",
+        "FIRE_YEAR": "2020",
+        "IGN_DATE":  "08/20/2020"
+    },
+
+    "REDFEATHER2017": {
+        "FIRENAME":  "Red Feather",
+        "FIRE_YEAR": "2017",
+        "IGN_DATE":  "04/06/2017"
+    },
+
+    "KELSO2016": {
+        "FIRENAME":  "Kelso",
+        "FIRE_YEAR": "2016",
+        "IGN_DATE":  "06/14/2016"
+    },
+
+    "COALCREEKWFU2008": {
+        "FIRENAME":  "Coal Creek Wfu",
+        "FIRE_YEAR": "2008",
+        "IGN_DATE":  "07/08/2008"
+    },
+
+    "CHERRYCRE2002": {
+        "FIRENAME":  "Cherry Cre",
+        "FIRE_YEAR": "2002",
+        "IGN_DATE":  "08/12/2002"
+    },
+
+    "FTLYONS2021": {
+        "FIRENAME":  "Ft. Lyons",
+        "FIRE_YEAR": "2021",
+        "IGN_DATE":  "01/15/2021"
+    },
+
+    "SNAKEWEED2008": {
+        "FIRENAME":  "Snakeweed",
+        "FIRE_YEAR": "2008",
+        "IGN_DATE":  "04/14/2008"
+    },
+
+    "YANKEEGULCH2003": {
+        "FIRENAME":  "Yankee Gulch",
+        "FIRE_YEAR": "2003",
+        "IGN_DATE":  "06/16/2003"
+    },
+
+    "SPRING2006": {
+        "FIRENAME":  "Spring",
+        "FIRE_YEAR": "2006",
+        "IGN_DATE":  "07/20/2006"
+    },
+
+    "HALEY2000": {
+        "FIRENAME":  "Haley",
+        "FIRE_YEAR": "2000",
+        "IGN_DATE":  "05/29/2000"
+    },
+
+    "TRIMBLEPOINTRX20172017": {
+        "FIRENAME":  "Trimble Point Rx 2017",
+        "FIRE_YEAR": "2017",
+        "IGN_DATE":  "05/30/2017"
+    },
+
+    "SPRING2009": {
+        "FIRENAME":  "Spring",
+        "FIRE_YEAR": "2009",
+        "IGN_DATE":  "08/30/2009"
+    },
+
+    "BENTFORT2020": {
+        "FIRENAME":  "Bent Fort",
+        "FIRE_YEAR": "2020",
+        "IGN_DATE":  "04/11/2020"
+    },
+
+    "MADCREEK2001": {
+        "FIRENAME":  "Mad Creek",
+        "FIRE_YEAR": "2001",
+        "IGN_DATE":  "07/08/2001"
+    },
+
+    "MEADOWCREEK2010": {
+        "FIRENAME":  "Meadow Creek",
+        "FIRE_YEAR": "2010",
+        "IGN_DATE":  "06/28/2010"
+    },
+
+    "DAVISDRAW2001": {
+        "FIRENAME":  "Davis Draw",
+        "FIRE_YEAR": "2001",
+        "IGN_DATE":  "07/17/2001"
+    },
+
+    "CHATEAU2018": {
+        "FIRENAME":  "Chateau",
+        "FIRE_YEAR": "2018",
+        "IGN_DATE":  "06/29/2018"
+    },
+
+    "DRAW2017": {
+        "FIRENAME":  "Draw",
+        "FIRE_YEAR": "2017",
+        "IGN_DATE":  "09/05/2017"
+    },
+
+    "BATTLEMENT2001": {
+        "FIRENAME":  "Battlement",
+        "FIRE_YEAR": "2001",
+        "IGN_DATE":  "04/17/2001"
+    },
+
+    "WILEYRIDG2002": {
+        "FIRENAME":  "Wiley Ridg",
+        "FIRE_YEAR": "2002",
+        "IGN_DATE":  "06/23/2002"
+    },
+
+    "SPRING2001": {
+        "FIRENAME":  "Spring",
+        "FIRE_YEAR": "2001",
+        "IGN_DATE":  "11/07/2001"
+    },
+
+    "LONGCANYON2002": {
+        "FIRENAME":  "Long Canyon",
+        "FIRE_YEAR": "2002",
+        "IGN_DATE":  "06/08/2002"
+    },
+
+    "SPRINGCREEK2009": {
+        "FIRENAME":  "Spring Creek",
+        "FIRE_YEAR": "2009",
+        "IGN_DATE":  "07/28/2009"
+    },
+
+    "COUNTYRDT2020": {
+        "FIRENAME":  "County Rd T",
+        "FIRE_YEAR": "2020",
+        "IGN_DATE":  "06/15/2020"
+    },
+
+    "PLUMCANYON2016": {
+        "FIRENAME":  "Plum Canyon",
+        "FIRE_YEAR": "2016",
+        "IGN_DATE":  "06/15/2016"
+    },
+
+    "ACE2012": {
+        "FIRENAME":  "Ace",
+        "FIRE_YEAR": "2012",
+        "IGN_DATE":  "06/04/2012"
+    },
+
+    "GREASEWOODCOMPLEX2001": {
+        "FIRENAME":  "Greasewood Complex",
+        "FIRE_YEAR": "2001",
+        "IGN_DATE":  "07/04/2001"
+    },
+
+    "HORSEPARK2018": {
+        "FIRENAME":  "Horse Park",
+        "FIRE_YEAR": "2018",
+        "IGN_DATE":  "05/26/2018"
+    },
+
+    "DOTSEROCRATER2003": {
+        "FIRENAME":  "Dotsero Crater",
+        "FIRE_YEAR": "2003",
+        "IGN_DATE":  "07/11/2003"
+    },
+
+    "GALENAFIRE2013": {
+        "FIRENAME":  "Galena Fire",
+        "FIRE_YEAR": "2013",
+        "IGN_DATE":  "03/15/2013"
+    },
+
+    "GEORGERX2009": {
+        "FIRENAME":  "George Rx",
+        "FIRE_YEAR": "2009",
+        "IGN_DATE":  "10/16/2009"
+    },
+
+    "HOPE2023": {
+        "FIRENAME":  "Hope",
+        "FIRE_YEAR": "2023",
+        "IGN_DATE":  "09/21/2023"
+    },
+
+    "SANTAFE2002": {
+        "FIRENAME":  "Santa Fe",
+        "FIRE_YEAR": "2002",
+        "IGN_DATE":  "03/23/2002"
+    },
+
+    "MTCARMEL2022": {
+        "FIRENAME":  "Mt Carmel",
+        "FIRE_YEAR": "2022",
+        "IGN_DATE":  "05/17/2022"
+    },
+
+    "NEWCASTLE2007": {
+        "FIRENAME":  "Newcastle",
+        "FIRE_YEAR": "2007",
+        "IGN_DATE":  "06/18/2007"
+    },
+
+    "QUAILHOLLOW2024": {
+        "FIRENAME":  "Quail Hollow",
+        "FIRE_YEAR": "2024",
+        "IGN_DATE":  "07/13/2024"
+    },
+
+    "BRADSHAW2007": {
+        "FIRENAME":  "Bradshaw",
+        "FIRE_YEAR": "2007",
+        "IGN_DATE":  "11/07/2007"
+    },
+
+    "MIDDLEMAMM2019": {
+        "FIRENAME":  "Middle Mamm",
+        "FIRE_YEAR": "2019",
+        "IGN_DATE":  "07/28/2019"
+    },
+
+    "BORDER2023": {
+        "FIRENAME":  "Border",
+        "FIRE_YEAR": "2023",
+        "IGN_DATE":  "09/21/2023"
+    },
+
+    "WILDHORSE52024": {
+        "FIRENAME":  "Wildhorse 5",
+        "FIRE_YEAR": "2024",
+        "IGN_DATE":  "09/29/2024"
+    },
+
+    "REDONDAIIRX2010": {
+        "FIRENAME":  "Redonda Ii Rx",
+        "FIRE_YEAR": "2010",
+        "IGN_DATE":  "10/12/2010"
+    },
+
+    "SUGARLOAF2018": {
+        "FIRENAME":  "Sugarloaf",
+        "FIRE_YEAR": "2018",
+        "IGN_DATE":  "06/28/2018"
+    },
+
+    "BIGDUCK2000": {
+        "FIRENAME":  "Big Duck",
+        "FIRE_YEAR": "2000",
+        "IGN_DATE":  "04/11/2000"
+    },
+
+    "DESERADO2023": {
+        "FIRENAME":  "Deserado",
+        "FIRE_YEAR": "2023",
+        "IGN_DATE":  "08/17/2023"
+    },
+
+    "LOGGING2010": {
+        "FIRENAME":  "Logging",
+        "FIRE_YEAR": "2010",
+        "IGN_DATE":  "07/20/2010"
+    },
+
+    "WELL2004": {
+        "FIRENAME":  "Well",
+        "FIRE_YEAR": "2004",
+        "IGN_DATE":  "08/29/2004"
+    },
+
+    "RANGE1272024": {
+        "FIRENAME":  "Range 127",
+        "FIRE_YEAR": "2024",
+        "IGN_DATE":  "04/15/2024"
+    },
+
+    "OLDMAN2001": {
+        "FIRENAME":  "Old Man",
+        "FIRE_YEAR": "2001",
+        "IGN_DATE":  "04/18/2001"
+    },
+
+    "FARDRAWWFU2005": {
+        "FIRENAME":  "Far Draw Wfu",
+        "FIRE_YEAR": "2005",
+        "IGN_DATE":  "09/11/2005"
+    },
+
+    "BURNINGTREE2011": {
+        "FIRENAME":  "Burning Tree",
+        "FIRE_YEAR": "2011",
+        "IGN_DATE":  "03/24/2011"
+    },
+
+    "WILDROSE2013": {
+        "FIRENAME":  "Wild Rose",
+        "FIRE_YEAR": "2013",
+        "IGN_DATE":  "06/19/2013"
+    },
+
+    "ROCKYFLATS2006": {
+        "FIRENAME":  "Rocky Flats",
+        "FIRE_YEAR": "2006",
+        "IGN_DATE":  "04/02/2006"
+    },
+
+    "HOVENWEEP2000": {
+        "FIRENAME":  "Hovenweep",
+        "FIRE_YEAR": "2000",
+        "IGN_DATE":  "07/22/2000"
+    },
+
+    "CEDARKNOB2012": {
+        "FIRENAME":  "Cedar Knob",
+        "FIRE_YEAR": "2012",
+        "IGN_DATE":  "07/10/2012"
+    },
+
+    "KEOTA2019": {
+        "FIRENAME":  "Keota",
+        "FIRE_YEAR": "2019",
+        "IGN_DATE":  "03/19/2019"
+    },
+
+    "BEARCREEK2023": {
+        "FIRENAME":  "Bear Creek",
+        "FIRE_YEAR": "2023",
+        "IGN_DATE":  "07/28/2023"
+    },
+
+    "MAVERICK2003": {
+        "FIRENAME":  "Maverick",
+        "FIRE_YEAR": "2003",
+        "IGN_DATE":  "07/22/2003"
+    },
+
+    "CARRIZOCOMPLEX2005": {
+        "FIRENAME":  "Carrizo Complex",
+        "FIRE_YEAR": "2005",
+        "IGN_DATE":  "07/25/2005"
+    },
+
+    "CHEROKEERANCH2003": {
+        "FIRENAME":  "Cherokee Ranch",
+        "FIRE_YEAR": "2003",
+        "IGN_DATE":  "10/29/2003"
+    },
+
+    "NASHRANCH2008": {
+        "FIRENAME":  "Nash Ranch",
+        "FIRE_YEAR": "2008",
+        "IGN_DATE":  "06/27/2008"
+    },
+
+    "TA432022": {
+        "FIRENAME":  "Ta-43",
+        "FIRE_YEAR": "2022",
+        "IGN_DATE":  "04/28/2022"
+    },
+
+    "RIOBLANCOWFU2005": {
+        "FIRENAME":  "Rio Blanco Wfu",
+        "FIRE_YEAR": "2005",
+        "IGN_DATE":  "06/22/2005"
+    },
+
+    "COUNTYROAD562022": {
+        "FIRENAME":  "County Road 56",
+        "FIRE_YEAR": "2022",
+        "IGN_DATE":  "04/06/2022"
+    },
+
+    "RESERVOIRGULCHRX2010": {
+        "FIRENAME":  "Reservoir Gulch Rx",
+        "FIRE_YEAR": "2010",
+        "IGN_DATE":  "05/07/2010"
+    },
+
+    "BLAIR2016": {
+        "FIRENAME":  "Blair",
+        "FIRE_YEAR": "2016",
+        "IGN_DATE":  "06/29/2016"
+    },
+
+    "WESTGUARD2018": {
+        "FIRENAME":  "West Guard",
+        "FIRE_YEAR": "2018",
+        "IGN_DATE":  "07/22/2018"
+    },
+
+    "JORDAN2008": {
+        "FIRENAME":  "Jordan",
+        "FIRE_YEAR": "2008",
+        "IGN_DATE":  "08/25/2008"
+    },
+
+    "BOGGSVILLLE2024": {
+        "FIRENAME":  "Boggsvillle",
+        "FIRE_YEAR": "2024",
+        "IGN_DATE":  "03/02/2024"
+    },
+
+    "BIGA2011": {
+        "FIRENAME":  "Big A",
+        "FIRE_YEAR": "2011",
+        "IGN_DATE":  "08/03/2011"
+    },
+
+    "FAWN2018": {
+        "FIRENAME":  "Fawn",
+        "FIRE_YEAR": "2018",
+        "IGN_DATE":  "07/07/2018"
+    },
+
+    "COG2013": {
+        "FIRENAME":  "Cog",
+        "FIRE_YEAR": "2013",
+        "IGN_DATE":  "08/17/2013"
+    },
+
+    "I762006": {
+        "FIRENAME":  "I 76",
+        "FIRE_YEAR": "2006",
+        "IGN_DATE":  "07/15/2006"
+    },
+
+    "SIEBER2020": {
+        "FIRENAME":  "Sieber",
+        "FIRE_YEAR": "2020",
+        "IGN_DATE":  "06/05/2020"
+    },
+
+    "WITHERSCANYON2011": {
+        "FIRENAME":  "Withers Canyon",
+        "FIRE_YEAR": "2011",
+        "IGN_DATE":  "07/23/2011"
+    },
+
+    "VILLEGREENNORTHRXCOMANCHERD2019": {
+        "FIRENAME":  "Villegreen North Rx - Comanche Rd",
+        "FIRE_YEAR": "2019",
+        "IGN_DATE":  "03/14/2019"
+    },
+
+    "TABAGUACHECREEK2009": {
+        "FIRENAME":  "Tabaguache Creek",
+        "FIRE_YEAR": "2009",
+        "IGN_DATE":  "08/29/2009"
+    },
+
+    "ELDORADO2000": {
+        "FIRENAME":  "Eldorado",
+        "FIRE_YEAR": "2000",
+        "IGN_DATE":  "09/15/2000"
+    }
+}
