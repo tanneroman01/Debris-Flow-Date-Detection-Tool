@@ -409,6 +409,7 @@ def run(
     output_shp: str,
     ign_date_str: str,
     gee_project: str,
+    gee_credentials: str = None,
     params: dict = None,
     log=print,
     progress_callback=None,
@@ -433,12 +434,25 @@ def run(
         cfg.update(params)
 
     # Initialize GEE
-    try:
-        ee.Initialize(project=gee_project)
-    except Exception:
-        log("GEE not initialized -- attempting authentication...")
-        ee.Authenticate()
-        ee.Initialize(project=gee_project)
+    if gee_credentials:
+        import json
+        import google.oauth2.credentials
+        creds_data = json.loads(gee_credentials)
+        credentials = google.oauth2.credentials.Credentials(
+            token=None,
+            refresh_token=creds_data["refresh_token"],
+            token_uri="https://oauth2.googleapis.com/token",
+            client_id=creds_data["client_id"],
+            client_secret=creds_data["client_secret"],
+        )
+        ee.Initialize(credentials=credentials, project=gee_project)
+    else:
+        try:
+            ee.Initialize(project=gee_project)
+        except Exception:
+            log("GEE not initialized -- attempting authentication...")
+            ee.Authenticate()
+            ee.Initialize(project=gee_project)
 
     # Compute date range
     ign_date = datetime.strptime(ign_date_str, "%m/%d/%Y")
