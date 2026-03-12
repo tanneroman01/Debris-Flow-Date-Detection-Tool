@@ -104,8 +104,12 @@ def run(
     log(f"Saved polygons with attributes to {polys_out}")
 
     # Create centroid points with template schema
+    EXCLUDE_FIELDS = {
+        "PREC_TIME", "PRE_SAT", "PRE_YEAR", "PRE_MONTH", "PRE_DAY",
+        "POST_SAT", "POST_YEAR", "POST_MONTH", "POST_DAY", "CERTAINTY",
+    }
     template = gpd.read_file(template_shp)
-    template_fields = [c for c in template.columns if c != "geometry"]
+    template_fields = [c for c in template.columns if c != "geometry" and c not in EXCLUDE_FIELDS]
 
     centroids = polys.copy()
     centroids["geometry"] = polys.geometry.representative_point()
