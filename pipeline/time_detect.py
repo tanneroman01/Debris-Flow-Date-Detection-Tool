@@ -14,7 +14,7 @@ import numpy as np
 from tqdm import tqdm
 import ee
 
-# ---------- Default detection parameters (Run 7 best config) ----------
+# ---------- Default detection parameters (currently best config from 10 runs on a test set) ----------
 DEFAULTS = {
     "aggregation_interval": 30,
     "cloud_cover_max": 30,
