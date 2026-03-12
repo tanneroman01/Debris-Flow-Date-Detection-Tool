@@ -437,13 +437,14 @@ def run(
     if gee_credentials:
         import json
         import google.oauth2.credentials
+        from ee import oauth as ee_oauth
         creds_data = json.loads(gee_credentials)
         credentials = google.oauth2.credentials.Credentials(
             token=None,
             refresh_token=creds_data["refresh_token"],
-            token_uri="https://oauth2.googleapis.com/token",
-            client_id=creds_data["client_id"],
-            client_secret=creds_data["client_secret"],
+            token_uri=creds_data.get("token_uri", "https://oauth2.googleapis.com/token"),
+            client_id=creds_data.get("client_id", ee_oauth.CLIENT_ID),
+            client_secret=creds_data.get("client_secret", ee_oauth.CLIENT_SECRET),
         )
         ee.Initialize(credentials=credentials, project=gee_project)
     else:
