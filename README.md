@@ -8,7 +8,7 @@ See [docs/methodology.md](docs/methodology.md) for a full explanation of the pro
 
 ## Running Locally
 
-Running locally is recommended for large fires (>~10 polygons), as the cloud deployment at [(https://debris-flow-date-detection-tool-sjmnanym4tw2rvc7hh23s7.streamlit.app)] times out during long GEE  runs.
+Running locally is recommended for large fires (>~10 polygons), as the [Streamlit cloud deployment of this tool](https://debris-flow-date-detection-tool-sjmnanym4tw2rvc7hh23s7.streamlit.app) times out during long GEE runs (free tier issues).
 
 ### Prerequisites
 
