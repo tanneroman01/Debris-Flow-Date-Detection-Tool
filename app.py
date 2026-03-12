@@ -32,7 +32,7 @@ APP_DIR = os.path.dirname(os.path.abspath(__file__))
 DATA_DIR = os.path.join(APP_DIR, "data")
 FIRE_DEFAULTS_PATH = os.path.join(DATA_DIR, "fire_defaults.json")
 TEMPLATE_SHP = os.path.join(DATA_DIR, "template", "CDOT_ShapefileTemplate.shp")
-ROADS_SHP = os.path.join(DATA_DIR, "roads", "gis_osm_roads_free_1.shp")
+ROADS_SHP = os.path.join(DATA_DIR, "template", "roads", "gis_osm_roads_free_1.shp")
 
 # helper functions for fetching defaults, saving uploads, and creating download zips
 def load_fire_defaults():
@@ -101,7 +101,14 @@ with st.sidebar:
         help="Your Google Earth Engine cloud project ID (e.g., 'my-gee-project-12345')",
     )
 
-    st.divider() 
+    gee_credentials = st.text_area(
+        "GEE Credentials JSON",
+        value="",
+        height=100,
+        help="Paste the contents of ~/.config/earthengine/credentials (run 'earthengine authenticate' locally to generate it)",
+    )
+
+    st.divider()
     st.subheader("Fire Selection")
     obs_user = st.text_input("Observer name (OBS_USER)", value="", help="Your name or initials for the OBS_USER field")
 
@@ -268,6 +275,7 @@ if st.button("Run Tool", type="primary", disabled=not ready, use_container_width
             fire_key=fire_key,
             obs_date=obs_date_str,
             gee_project=gee_project,
+            gee_credentials=gee_credentials or None,
             output_dir=output_dir,
             log=ui_log,
             progress_callback=progress_callback,
