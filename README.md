@@ -1,14 +1,14 @@
 # Debris Flow Date Detection Tool
 
-A Streamlit web app for detecting post-fire debris flow event dates from Sentinel-2 satellite imagery and CHIRPS precipitation data via Google Earth Engine.
+A Streamlit web app for detecting post-fire debris flow event dates from Sentinel-2 satellite imagery via Google Earth Engine.
 
-See [docs/methodology.md](docs/methodology.md) for full methodology documentation.
+See [docs/methodology.md](docs/methodology.md) for a full explanation of the process.
 
 ---
 
 ## Running Locally
 
-Running locally is recommended for large fires (>~10 polygons), as cloud deployments may time out during long GEE processing runs.
+Running locally is recommended for large fires (>~10 polygons), as the cloud deployment at [(https://debris-flow-date-detection-tool-sjmnanym4tw2rvc7hh23s7.streamlit.app)] times out during long GEE  runs.
 
 ### Prerequisites
 
@@ -34,13 +34,13 @@ pip install -r requirements.txt
 ```bash
 earthengine authenticate
 ```
-This opens a browser window. Sign in with the Google account linked to your GEE project and follow the prompts. You only need to do this once.
+This opens a browser window. Sign in with the Google account linked to your GEE project and follow the prompts. You only need to do this once, in subsequent runs the tool references the .config file.
 
 **4. Run the app**
 ```bash
 streamlit run app.py
 ```
-The app will open in your browser at `http://localhost:8501`.
+The app will open in your browser at this port: `http://localhost:8501`.
 
 ---
 
@@ -50,9 +50,9 @@ The app will open in your browser at `http://localhost:8501`.
 
 | Input | Description |
 |---|---|
-| **GEE Cloud Project ID** | Your GEE project ID (e.g. `my-project-123456`). Find it at [console.cloud.google.com](https://console.cloud.google.com) or run `earthengine project list`. |
+| **GEE Cloud Project ID** | Your GEE project ID (e.g. `tannersproject_123456`). Find it at [console.cloud.google.com](https://console.cloud.google.com) or run `earthengine project list`. |
 | **GEE Credentials JSON** | Only required when using the hosted web app. Paste the contents of `~/.config/earthengine/credentials` (Windows: `C:\Users\<you>\.config\earthengine\credentials`). Leave blank when running locally. |
-| **KML file** | Exported from Google Earth with your mapped debris flow polygons. Supported feature types: deposits, initiation zones, outlets, landslide scarps. Polygons are recommended — points and linestrings will be buffered to 50m. |
+| **KML file** | Exported from Google Earth with your mapped debris flow polygons. Polygons are recommended — points and linestrings will be buffered to 50m. |
 | **Fire boundary shapefile** | Upload all components (.shp, .shx, .dbf, .prj). Used to clip the road network for ROAD_REL attribution. |
 | **Fire** | Select from the built-in Colorado fire database (MTBS fires) or enter custom fire metadata manually. |
 
@@ -84,4 +84,3 @@ A ZIP file containing a shapefile of centroid points with the following fields:
 - Processing time is approximately 20–40 minutes for fires with ~50 polygons, depending on GEE server load.
 - Detection is limited to the active debris flow season (April–November) and skips snow-covered intervals (NDSI > 0.4).
 - A post-fire buffer of ~9 months is applied before searching for events, to avoid detecting the fire itself.
-- The tool currently includes fire boundary data for Colorado MTBS fires. For fires outside this database, use the manual fire entry option in the sidebar.
