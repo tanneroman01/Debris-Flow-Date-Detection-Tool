@@ -109,6 +109,15 @@ with st.sidebar:
     )
 
     st.divider()
+    st.subheader("Imagery Source")
+    sensor_choice = st.radio(
+        "Satellite imagery for date detection",
+        ["Sentinel-2 (2015+)", "Landsat (2010+)"],
+        help="Use Landsat for fires before mid-2015 when Sentinel-2 imagery is not available",
+    )
+    sensor_key = "landsat" if "Landsat" in sensor_choice else "sentinel2"
+
+    st.divider()
     st.subheader("Fire Selection")
     obs_user = st.text_input("Observer name (OBS_USER)", value="", help="Your name or initials for the OBS_USER field")
 
@@ -276,6 +285,8 @@ if st.button("Run Tool", type="primary", disabled=not ready, use_container_width
             obs_date=obs_date_str,
             gee_project=gee_project,
             gee_credentials=gee_credentials or None,
+            detection_params=None,
+            sensor=sensor_key,
             output_dir=output_dir,
             log=ui_log,
             progress_callback=progress_callback,
@@ -321,5 +332,5 @@ if st.button("Run Tool", type="primary", disabled=not ready, use_container_width
 st.divider()
 st.caption(
     "Debris Flow Detection Tool | CDOT Project | "
-    "Powered by Google Earth Engine, Sentinel-2, CHIRPS, Streamlit, OpenStreetMap, and more. Developed by Tanner Oman"
+    "Powered by Google Earth Engine, Sentinel-2, Landsat, CHIRPS, Streamlit, OpenStreetMap, and more. Developed by Tanner Oman"
 )

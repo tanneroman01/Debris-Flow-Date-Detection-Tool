@@ -6,7 +6,7 @@ import os
 import json
 import tempfile
 
-from pipeline import kml_to_shp, attributer, time_detect, merger
+from pipeline import kml_to_shp, attributer, merger
 
 
 def run_full_pipeline(
@@ -21,6 +21,7 @@ def run_full_pipeline(
     output_dir: str,
     gee_credentials: str = None,
     detection_params: dict = None,
+    sensor: str = "sentinel2",
     log=print,
     progress_callback=None,
 ) -> str:
@@ -91,6 +92,10 @@ def run_full_pipeline(
     )
 
     # ── Step 3: Date Detection ──
+    if sensor == "landsat":
+        from pipeline import time_detect_landsat as time_detect
+    else:
+        from pipeline import time_detect
     update_progress(3, "Detecting debris flow dates (GEE)")
     log("\n" + "=" * 50)
     log("STEP 3: Date Detection")
