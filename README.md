@@ -55,6 +55,7 @@ The app will open in your browser at this port: `http://localhost:8501`.
 | **KML file** | Exported from Google Earth with your mapped debris flow polygons. Polygons are recommended — points and linestrings will be buffered to 50m. |
 | **Fire boundary shapefile** | Upload all components (.shp, .shx, .dbf, .prj). Used to clip the road network for ROAD_REL attribution. |
 | **Fire** | Select from the built-in Colorado fire database (MTBS fires) or enter custom fire metadata manually. |
+| **Imagery Source** | Select from Sentinel-2 or Landsat, be mindful that Landsat has a more course native resultion (30m) than Sentinel (10m), if earliest search date (i.e., fire ignition date) is post-2015, go with Sentinel. |
 
 ### Output
 
