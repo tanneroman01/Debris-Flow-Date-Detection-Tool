@@ -1,6 +1,6 @@
 # Debris Flow Date Detection Tool
 
-A Streamlit web app for detecting post-fire debris flow event dates from Sentinel-2 satellite imagery via Google Earth Engine.
+A Streamlit web app for detecting post-fire debris flow event dates from Sentinel-2 or Landsat satellite imagery via Google Earth Engine.
 
 See [docs/methodology.md](docs/methodology.md) for a full explanation of the process.
 
