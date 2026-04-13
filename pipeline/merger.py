@@ -46,7 +46,16 @@ def run(
     dupe_pts = pts[points_name_field].duplicated().sum()
 
     if dupe_time or dupe_pts:
-        log("Duplicate names detected -- using positional join (row order)")
+        if len(pts) != len(time_df):
+            raise ValueError(
+                f"Cannot merge by row order: duplicate names in {points_name_field} "
+                f"but row counts differ ({len(pts)} points vs {len(time_df)} time records). "
+                f"Ensure every polygon from Step 1 has a unique name or matching row count."
+            )
+        log(
+            f"WARNING: duplicate names detected -- falling back to positional join "
+            f"(row order). {len(pts)} points aligned by index; verify output carefully."
+        )
         pts_reset = pts.reset_index(drop=True)
         time_reset = time_df.reset_index(drop=True)
         date_cols = [c for c in time_reset.columns if c != points_name_field]
