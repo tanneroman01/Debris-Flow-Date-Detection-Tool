@@ -119,10 +119,27 @@ def _get_gee_timeseries_chunk(ee_polygon, collection, chunk_start, chunk_end, sc
     return results.getInfo()["features"]
 
 
+def _shapely_to_ee_geometry(geom):
+    """Convert a shapely Polygon or MultiPolygon to an ee.Geometry."""
+    if geom.geom_type == "Polygon":
+        return ee.Geometry.Polygon(
+            [[list(c) for c in geom.exterior.coords]]
+            + [[list(c) for c in ring.coords] for ring in geom.interiors]
+        )
+    if geom.geom_type == "MultiPolygon":
+        parts = []
+        for part in geom.geoms:
+            parts.append(
+                [[list(c) for c in part.exterior.coords]]
+                + [[list(c) for c in ring.coords] for ring in part.interiors]
+            )
+        return ee.Geometry.MultiPolygon(parts)
+    raise TypeError(f"Unsupported geometry type for GEE: {geom.geom_type}")
+
+
 def get_gee_timeseries(geom, search_start, search_end, cfg, scale=10):
     try:
-        geom_coords = list(geom.exterior.coords)
-        ee_polygon = ee.Geometry.Polygon(geom_coords)
+        ee_polygon = _shapely_to_ee_geometry(geom)
 
         collection = (
             ee.ImageCollection("COPERNICUS/S2_SR_HARMONIZED")

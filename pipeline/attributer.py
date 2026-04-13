@@ -133,7 +133,10 @@ def run(
     points_gdf = gpd.GeoDataFrame(
         points_data, geometry=centroids["geometry"].values, crs=polys.crs
     )
-    points_gdf = points_gdf.set_crs("EPSG:4326", allow_override=True)
+    if points_gdf.crs is None:
+        points_gdf = points_gdf.set_crs("EPSG:4326")
+    elif points_gdf.crs.to_epsg() != 4326:
+        points_gdf = points_gdf.to_crs("EPSG:4326")
 
     points_out = os.path.join(output_dir, "points.shp")
     for ext in [".shp", ".shx", ".dbf", ".prj", ".cpg"]:
