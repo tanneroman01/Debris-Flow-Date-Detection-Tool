@@ -43,12 +43,9 @@ A baseline with which to compare the changes in the composite score for is also 
 
 $ Threshold = RefStdev * 0.75 $
 
-The first interval where the composite score exceeds the detection threshold is marked as the "event", which is then passed to the precip validation functions.
+The first interval where the composite score exceeds the detection threshold is marked as the "event".
 
-### 3.4 Precipitation Validation
-The purpose here is to reject spectral change events that lack a rainfall trigger. The CHIRPS dataset is queried for precip values for each polygon and sums all daily precip values for a 30-day window preceding the candidate event date. If total precip over the preceding 30 days is below 10mm, the event is discarded. 
-
-### 3.5 Detection Parameters
+### 3.4 Detection Parameters
 
 I performed 10 runs on a set of polygons with known dates from the Cameron Peak and Grizzly Creek fires (from the USGS data release), each with a different combinations of parameters. The current list of parameters in use represents the best run out of these ten. However, this was an informal tuning on a small test set with no hold-out validation. Building a larger test set, defining formal evaluation metrics (e.g. F1), and performing a grid search would likely improve this tool markedly. 
 

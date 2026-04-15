@@ -3,7 +3,7 @@ Step 3: Debris flow date detection using Google Earth Engine (Landsat variant).
 
 Pulls harmonized Landsat 5/7/8 time series over each deposit polygon, computes
 composite change scores (NBR + NDVI + RED), and detects the first significant
-change event with CHIRPS precipitation filtering.
+change event.
 
 Landsat coverage begins ~1984, making this suitable for fires from ~2010 onward
 (where Sentinel-2, starting mid-2015, is too late).
@@ -28,8 +28,6 @@ DEFAULTS = {
     "weight_dnbr": 0.35,
     "weight_ndvi": 0.45,
     "weight_b04": 0.20,
-    "precip_window_days": 30,
-    "precip_min_threshold": 10.0,
     "post_fire_buffer_days": 270,
     "local_ref_inner_buffer_m": 50,
     "local_ref_outer_buffer_m": 500,
@@ -42,7 +40,6 @@ FIELD_EVENT_DATE = "EVENT_DATE"
 FIELD_START = "DATE_START"
 FIELD_END = "DATE_END"
 FIELD_CONFIDENCE = "CONFIDENCE"
-FIELD_PRECIP_MM = "PRECIP_MM"
 FIELD_CHG_SCORE = "CHG_SCORE"
 
 # Landsat band mappings: satellite-native names → common names
@@ -334,38 +331,6 @@ def compute_change_scores(ts, cfg):
     return results
 
 
-def get_chirps_precip(geom, event_date, window_days):
-    try:
-        centroid = geom.centroid
-        ee_point = ee.Geometry.Point([centroid.x, centroid.y])
-        end_date = event_date.strftime("%Y-%m-%d")
-        start_date = (event_date - timedelta(days=window_days)).strftime("%Y-%m-%d")
-
-        chirps = (
-            ee.ImageCollection("UCSB-CHG/CHIRPS/DAILY")
-            .filterDate(start_date, end_date)
-            .filterBounds(ee_point)
-        )
-
-        img_count = chirps.size().getInfo()
-        if img_count == 0:
-            return None
-
-        total = chirps.sum().reduceRegion(
-            reducer=ee.Reducer.mean(),
-            geometry=ee_point.buffer(1000),
-            scale=5000,
-            maxPixels=1e6,
-        )
-
-        result = total.getInfo()
-        precip = result.get("precipitation")
-        return precip if precip is not None else None
-
-    except Exception:
-        return None
-
-
 def get_local_reference_baseline(geom, gdf, idx, ign_date, search_start, cfg):
     try:
         import warnings
@@ -437,18 +402,16 @@ def get_local_reference_baseline(geom, gdf, idx, ign_date, search_start, cfg):
         return None
 
 
-def compute_confidence(change_score, threshold, precip_mm, obs_count):
+def compute_confidence(change_score, threshold, obs_count):
     strong_count = 0
     if change_score > threshold * 2:
-        strong_count += 1
-    if precip_mm is not None and precip_mm > 15.0:
         strong_count += 1
     if obs_count is not None and obs_count >= 3:
         strong_count += 1
 
-    if strong_count >= 3:
+    if strong_count >= 2:
         return "High"
-    elif strong_count >= 2:
+    elif strong_count >= 1:
         return "Medium"
     else:
         return "Low"
@@ -477,15 +440,7 @@ def detect_change_event(ts, cfg, ref_std=None, geom=None):
         change_score = float(diffs[i])
         obs_count = scores[i + 1].get("count", 0)
 
-        precip_mm = None
-        if geom is not None:
-            precip_mm = get_chirps_precip(
-                geom, candidate_date, cfg["precip_window_days"]
-            )
-            if precip_mm is not None and precip_mm < cfg["precip_min_threshold"]:
-                continue
-
-        confidence = compute_confidence(change_score, threshold, precip_mm, obs_count)
+        confidence = compute_confidence(change_score, threshold, obs_count)
 
         all_events.append(
             (
@@ -493,7 +448,6 @@ def detect_change_event(ts, cfg, ref_std=None, geom=None):
                 candidate_start,
                 candidate_date,
                 change_score,
-                precip_mm if precip_mm is not None else -1.0,
                 confidence,
             )
         )
@@ -573,7 +527,7 @@ def run(
     for field in [FIELD_CONFIDENCE]:
         if field not in gdf.columns:
             gdf[field] = ""
-    for field in [FIELD_PRECIP_MM, FIELD_CHG_SCORE]:
+    for field in [FIELD_CHG_SCORE]:
         if field not in gdf.columns:
             gdf[field] = np.nan
 
@@ -620,28 +574,25 @@ def run(
             log(f"  Polygon {idx}: No valid event detected")
             continue
 
-        event_date, start_date, end_date, change_score, precip_mm, confidence = event
+        event_date, start_date, end_date, change_score, confidence = event
 
         if all_events and len(all_events) > 1:
             other_dates = [e[0].strftime("%Y-%m-%d") for e in all_events[1:]]
             log(
                 f"  Polygon {idx}: Event {event_date.strftime('%Y-%m-%d')} "
-                f"(score: {change_score:.4f}, precip: {precip_mm:.1f}mm, conf: {confidence}) "
+                f"(score: {change_score:.4f}, conf: {confidence}) "
                 f"[+{len(all_events)-1} more: {', '.join(other_dates)}]"
             )
         else:
             log(
                 f"  Polygon {idx}: Event {event_date.strftime('%Y-%m-%d')} "
-                f"(score: {change_score:.4f}, precip: {precip_mm:.1f}mm, conf: {confidence})"
+                f"(score: {change_score:.4f}, conf: {confidence})"
             )
 
         gdf.at[idx, FIELD_EVENT_DATE] = event_date.strftime("%Y-%m-%d")
         gdf.at[idx, FIELD_START] = start_date.strftime("%Y-%m-%d")
         gdf.at[idx, FIELD_END] = end_date.strftime("%Y-%m-%d")
         gdf.at[idx, FIELD_CONFIDENCE] = confidence
-        gdf.at[idx, FIELD_PRECIP_MM] = (
-            round(precip_mm, 1) if precip_mm >= 0 else None
-        )
         gdf.at[idx, FIELD_CHG_SCORE] = round(change_score, 4)
 
     if progress_callback:

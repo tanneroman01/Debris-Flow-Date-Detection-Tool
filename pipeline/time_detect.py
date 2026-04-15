@@ -3,7 +3,7 @@ Step 3: Debris flow date detection using Google Earth Engine.
 
 Pulls Sentinel-2 time series over each deposit polygon, computes composite
 change scores (NBR + NDVI + B04), and detects the first significant change
-event with CHIRPS precipitation filtering.
+event.
 """
 
 import os
@@ -25,13 +25,14 @@ DEFAULTS = {
     "weight_dnbr": 0.35,
     "weight_ndvi": 0.45,
     "weight_b04": 0.20,
-    "precip_window_days": 30,
-    "precip_min_threshold": 10.0,
     "post_fire_buffer_days": 270,
     "local_ref_inner_buffer_m": 50,
     "local_ref_outer_buffer_m": 500,
     "local_ref_scale": 30,
     "local_ref_min_area_m2": 50000,
+    "refine_events": True,
+    "refine_margin_days": 15,
+    "refine_scale": 10,
 }
 
 # Output field names
@@ -39,7 +40,6 @@ FIELD_EVENT_DATE = "EVENT_DATE"
 FIELD_START = "DATE_START"
 FIELD_END = "DATE_END"
 FIELD_CONFIDENCE = "CONFIDENCE"
-FIELD_PRECIP_MM = "PRECIP_MM"
 FIELD_CHG_SCORE = "CHG_SCORE"
 
 
@@ -252,33 +252,130 @@ def compute_change_scores(ts, cfg):
     return results
 
 
-def get_chirps_precip(geom, event_date, window_days):
-    try:
-        centroid = geom.centroid
-        ee_point = ee.Geometry.Point([centroid.x, centroid.y])
-        end_date = event_date.strftime("%Y-%m-%d")
-        start_date = (event_date - timedelta(days=window_days)).strftime("%Y-%m-%d")
+def _fetch_individual_acquisitions(ee_polygon, start_str, end_str, cfg):
+    """Pull per-acquisition polygon-mean NBR/NDVI/B04/NDSI (no compositing)."""
+    collection = (
+        ee.ImageCollection("COPERNICUS/S2_SR_HARMONIZED")
+        .filterDate(start_str, end_str)
+        .filterBounds(ee_polygon)
+        .filter(ee.Filter.lt("CLOUDY_PIXEL_PERCENTAGE", cfg["cloud_cover_max"]))
+    )
 
-        chirps = (
-            ee.ImageCollection("UCSB-CHG/CHIRPS/DAILY")
-            .filterDate(start_date, end_date)
-            .filterBounds(ee_point)
+    def mask_clouds_scl(image):
+        scl = image.select("SCL")
+        clear = scl.neq(3).And(scl.neq(8)).And(scl.neq(9)).And(scl.neq(10))
+        return image.updateMask(clear)
+
+    collection = collection.map(mask_clouds_scl)
+
+    def per_image_stats(image):
+        nbr = image.normalizedDifference(["B8", "B12"]).rename("NBR")
+        ndvi = image.normalizedDifference(["B8", "B4"]).rename("NDVI")
+        ndsi = image.normalizedDifference(["B3", "B11"]).rename("NDSI")
+        combined = (
+            image.select(["B4"]).addBands(nbr).addBands(ndvi).addBands(ndsi)
+        )
+        stats = combined.reduceRegion(
+            reducer=ee.Reducer.mean(),
+            geometry=ee_polygon,
+            scale=cfg["refine_scale"],
+            maxPixels=1e7,
+        )
+        return ee.Feature(
+            None,
+            {
+                "date": image.date().format("YYYY-MM-dd"),
+                "B04": stats.get("B4"),
+                "NBR": stats.get("NBR"),
+                "NDVI": stats.get("NDVI"),
+                "NDSI": stats.get("NDSI"),
+            },
         )
 
-        img_count = chirps.size().getInfo()
-        if img_count == 0:
+    feats = collection.map(per_image_stats).getInfo()["features"]
+    return [f["properties"] for f in feats]
+
+
+def refine_event_window(geom, coarse_iv_start, coarse_iv_end, cfg):
+    """
+    Tighten a coarse event window using individual Sentinel-2 acquisitions.
+
+    Pulls every cloud-free acquisition in the coarse window (extended by
+    ``refine_margin_days`` on both sides), scores each one with the same
+    composite weights used for the coarse pass, and returns the adjacent
+    pair with the largest jump in score.
+
+    Returns
+    -------
+    (pre_dt, post_dt, event_dt) or None
+        ``pre_dt`` is the last acquisition still in the pre-event state.
+        ``post_dt`` is the first acquisition in the post-event state.
+        ``event_dt`` is the midpoint of the two (best single-date estimate).
+        Returns ``None`` if there are not enough clear acquisitions to
+        identify a jump.
+    """
+    try:
+        ee_polygon = _shapely_to_ee_geometry(geom)
+        margin = cfg.get("refine_margin_days", 15)
+        start_str = (coarse_iv_start - timedelta(days=margin)).strftime("%Y-%m-%d")
+        end_str = (coarse_iv_end + timedelta(days=margin)).strftime("%Y-%m-%d")
+
+        acquisitions = _fetch_individual_acquisitions(
+            ee_polygon, start_str, end_str, cfg
+        )
+        if not acquisitions or len(acquisitions) < 2:
             return None
 
-        total = chirps.sum().reduceRegion(
-            reducer=ee.Reducer.mean(),
-            geometry=ee_point.buffer(1000),
-            scale=5000,
-            maxPixels=1e6,
-        )
+        scored = []
+        for acq in acquisitions:
+            date_str = acq.get("date")
+            if not date_str:
+                continue
+            nbr = acq.get("NBR")
+            ndvi = acq.get("NDVI")
+            b04 = acq.get("B04")
+            ndsi = acq.get("NDSI")
+            if nbr is None and ndvi is None:
+                continue
+            if ndsi is not None and ndsi > cfg["ndsi_snow_threshold"]:
+                continue
+            nbr_v = nbr if nbr is not None else 0.0
+            ndvi_v = ndvi if ndvi is not None else 0.0
+            b04_v = b04 if b04 is not None else 0.0
+            nbr_norm = (nbr_v + 1.0) / 2.0
+            ndvi_norm = (ndvi_v + 1.0) / 2.0
+            b04_norm = 1.0 - max(0.0, min(1.0, b04_v / 3000.0))
+            score = (
+                cfg["weight_dnbr"] * nbr_norm
+                + cfg["weight_ndvi"] * ndvi_norm
+                + cfg["weight_b04"] * b04_norm
+            )
+            try:
+                dt = parser.parse(date_str)
+            except Exception:
+                continue
+            scored.append((dt, score))
 
-        result = total.getInfo()
-        precip = result.get("precipitation")
-        return precip if precip is not None else None
+        if len(scored) < 2:
+            return None
+
+        scored.sort(key=lambda x: x[0])
+
+        max_jump = 0.0
+        max_idx = -1
+        for i in range(len(scored) - 1):
+            jump = abs(scored[i + 1][1] - scored[i][1])
+            if jump > max_jump:
+                max_jump = jump
+                max_idx = i
+
+        if max_idx < 0:
+            return None
+
+        pre_dt = scored[max_idx][0]
+        post_dt = scored[max_idx + 1][0]
+        event_dt = pre_dt + (post_dt - pre_dt) / 2
+        return pre_dt, post_dt, event_dt
 
     except Exception:
         return None
@@ -355,18 +452,16 @@ def get_local_reference_baseline(geom, gdf, idx, ign_date, search_start, cfg):
         return None
 
 
-def compute_confidence(change_score, threshold, precip_mm, obs_count):
+def compute_confidence(change_score, threshold, obs_count):
     strong_count = 0
     if change_score > threshold * 2:
-        strong_count += 1
-    if precip_mm is not None and precip_mm > 15.0:
         strong_count += 1
     if obs_count is not None and obs_count >= 3:
         strong_count += 1
 
-    if strong_count >= 3:
+    if strong_count >= 2:
         return "High"
-    elif strong_count >= 2:
+    elif strong_count >= 1:
         return "Medium"
     else:
         return "Low"
@@ -390,29 +485,40 @@ def detect_change_event(ts, cfg, ref_std=None, geom=None):
         if diffs[i] < threshold:
             continue
 
+        # Honest coarse bounds: the event could lie anywhere inside the two
+        # adjacent composite intervals, not just between their end dates.
+        coarse_iv_start = parser.parse(scores[i]["interval_start"])
+        coarse_iv_end = parser.parse(scores[i + 1]["interval_end"])
+        candidate_start = coarse_iv_start
+        candidate_end = coarse_iv_end
         candidate_date = scores[i + 1]["end_dt"]
-        candidate_start = scores[i]["end_dt"]
+        refined = False
+
         change_score = float(diffs[i])
         obs_count = scores[i + 1].get("count", 0)
 
-        precip_mm = None
-        if geom is not None:
-            precip_mm = get_chirps_precip(
-                geom, candidate_date, cfg["precip_window_days"]
-            )
-            if precip_mm is not None and precip_mm < cfg["precip_min_threshold"]:
-                continue
+        # Two-pass refinement: find the specific adjacent pair of clear
+        # acquisitions that straddle the jump. Localizes the event from
+        # ~60 days to the Sentinel-2 revisit cadence (~5-15 days).
+        if geom is not None and cfg.get("refine_events", True):
+            r = refine_event_window(geom, coarse_iv_start, coarse_iv_end, cfg)
+            if r is not None:
+                pre_dt, post_dt, event_dt = r
+                candidate_start = pre_dt
+                candidate_end = post_dt
+                candidate_date = event_dt
+                refined = True
 
-        confidence = compute_confidence(change_score, threshold, precip_mm, obs_count)
+        confidence = compute_confidence(change_score, threshold, obs_count)
 
         all_events.append(
             (
                 candidate_date,
                 candidate_start,
-                candidate_date,
+                candidate_end,
                 change_score,
-                precip_mm if precip_mm is not None else -1.0,
                 confidence,
+                refined,
             )
         )
 
@@ -491,7 +597,7 @@ def run(
     for field in [FIELD_CONFIDENCE]:
         if field not in gdf.columns:
             gdf[field] = ""
-    for field in [FIELD_PRECIP_MM, FIELD_CHG_SCORE]:
+    for field in [FIELD_CHG_SCORE]:
         if field not in gdf.columns:
             gdf[field] = np.nan
 
@@ -538,28 +644,29 @@ def run(
             log(f"  Polygon {idx}: No valid event detected")
             continue
 
-        event_date, start_date, end_date, change_score, precip_mm, confidence = event
+        event_date, start_date, end_date, change_score, confidence, refined = event
+        window_days = (end_date - start_date).days
+        tag = "refined" if refined else "coarse"
 
         if all_events and len(all_events) > 1:
             other_dates = [e[0].strftime("%Y-%m-%d") for e in all_events[1:]]
             log(
                 f"  Polygon {idx}: Event {event_date.strftime('%Y-%m-%d')} "
-                f"(score: {change_score:.4f}, precip: {precip_mm:.1f}mm, conf: {confidence}) "
+                f"[{tag}, +/-{window_days}d] "
+                f"(score: {change_score:.4f}, conf: {confidence}) "
                 f"[+{len(all_events)-1} more: {', '.join(other_dates)}]"
             )
         else:
             log(
                 f"  Polygon {idx}: Event {event_date.strftime('%Y-%m-%d')} "
-                f"(score: {change_score:.4f}, precip: {precip_mm:.1f}mm, conf: {confidence})"
+                f"[{tag}, +/-{window_days}d] "
+                f"(score: {change_score:.4f}, conf: {confidence})"
             )
 
         gdf.at[idx, FIELD_EVENT_DATE] = event_date.strftime("%Y-%m-%d")
         gdf.at[idx, FIELD_START] = start_date.strftime("%Y-%m-%d")
         gdf.at[idx, FIELD_END] = end_date.strftime("%Y-%m-%d")
         gdf.at[idx, FIELD_CONFIDENCE] = confidence
-        gdf.at[idx, FIELD_PRECIP_MM] = (
-            round(precip_mm, 1) if precip_mm >= 0 else None
-        )
         gdf.at[idx, FIELD_CHG_SCORE] = round(change_score, 4)
 
     if progress_callback:

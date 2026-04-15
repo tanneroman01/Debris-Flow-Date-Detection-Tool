@@ -32,7 +32,7 @@ def run(
 
     # Extract date columns
     date_fields = ["EVENT_DATE", "DATE_START", "DATE_END"]
-    extra_fields = ["CONFIDENCE", "PRECIP_MM", "CHG_SCORE"]
+    extra_fields = ["CONFIDENCE", "CHG_SCORE"]
     available = [f for f in date_fields + extra_fields if f in time_gdf.columns]
 
     keep = [time_name_field] + available

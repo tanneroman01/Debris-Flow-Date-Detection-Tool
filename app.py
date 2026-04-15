@@ -331,5 +331,5 @@ if st.button("Run Tool", type="primary", disabled=not ready, use_container_width
 st.divider()
 st.caption(
     "Debris Flow Detection Tool | CDOT Project | "
-    "Powered by Google Earth Engine, Sentinel-2, Landsat, CHIRPS, Streamlit, OpenStreetMap, and more. Developed by Tanner Oman"
+    "Powered by Google Earth Engine, Sentinel-2, Landsat, Streamlit, OpenStreetMap, and more. Developed by Tanner Oman"
 )

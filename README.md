@@ -73,7 +73,6 @@ A ZIP file containing a shapefile of centroid points with the following fields:
 | `DATE_START` | Start of detection interval |
 | `DATE_END` | End of detection interval |
 | `CONFIDENCE` | High / Medium / Low |
-| `PRECIP_MM` | Total precipitation (mm) in 30-day window before event |
 | `CHG_SCORE` | Composite spectral change score |
 | `LATITUDE` | Centroid latitude |
 | `LONGITUDE` | Centroid longitude |
