@@ -33,6 +33,13 @@ DEFAULTS = {
     "refine_events": True,
     "refine_margin_days": 15,
     "refine_scale": 10,
+    # Sentinel-1 SAR refinement (opt-in, experimental)
+    "use_s1_refinement": False,
+    "s1_orbit_strategy": "both",  # "both" | "ascending" | "descending"
+    "s1_weight_vv": 0.6,
+    "s1_weight_vh": 0.4,
+    # PRISM day-picker (used only when S2 and S1 agreement window is found)
+    "prism_dataset": "OREGONSTATE/PRISM/AN81d",
 }
 
 # Output field names
@@ -381,6 +388,215 @@ def refine_event_window(geom, coarse_iv_start, coarse_iv_end, cfg):
         return None
 
 
+def _fetch_s1_acquisitions(ee_polygon, start_str, end_str, orbit_pass, cfg):
+    """Pull per-acquisition polygon-mean VV and VH (sigma0 dB) from S1 GRD."""
+    try:
+        collection = (
+            ee.ImageCollection("COPERNICUS/S1_GRD")
+            .filterDate(start_str, end_str)
+            .filterBounds(ee_polygon)
+            .filter(ee.Filter.eq("instrumentMode", "IW"))
+            .filter(ee.Filter.eq("orbitProperties_pass", orbit_pass))
+            .filter(
+                ee.Filter.listContains("transmitterReceiverPolarisation", "VV")
+            )
+            .filter(
+                ee.Filter.listContains("transmitterReceiverPolarisation", "VH")
+            )
+        )
+
+        def per_image_stats(image):
+            stats = image.select(["VV", "VH"]).reduceRegion(
+                reducer=ee.Reducer.mean(),
+                geometry=ee_polygon,
+                scale=10,
+                maxPixels=1e7,
+            )
+            return ee.Feature(
+                None,
+                {
+                    "date": image.date().format("YYYY-MM-dd"),
+                    "VV": stats.get("VV"),
+                    "VH": stats.get("VH"),
+                },
+            )
+
+        feats = collection.map(per_image_stats).getInfo()["features"]
+        return [f["properties"] for f in feats]
+    except Exception:
+        return []
+
+
+def _refine_s1_single_orbit(geom, coarse_iv_start, coarse_iv_end, orbit_pass, cfg):
+    """Compute S1 refinement for a single orbit direction."""
+    try:
+        ee_polygon = _shapely_to_ee_geometry(geom)
+        margin = cfg.get("refine_margin_days", 15)
+        start_str = (coarse_iv_start - timedelta(days=margin)).strftime("%Y-%m-%d")
+        end_str = (coarse_iv_end + timedelta(days=margin)).strftime("%Y-%m-%d")
+
+        acquisitions = _fetch_s1_acquisitions(
+            ee_polygon, start_str, end_str, orbit_pass, cfg
+        )
+        if not acquisitions or len(acquisitions) < 2:
+            return None
+
+        raw = []
+        for acq in acquisitions:
+            date_str = acq.get("date")
+            vv = acq.get("VV")
+            vh = acq.get("VH")
+            if not date_str or vv is None or vh is None:
+                continue
+            score = cfg["s1_weight_vv"] * vv + cfg["s1_weight_vh"] * vh
+            try:
+                dt = parser.parse(date_str)
+            except Exception:
+                continue
+            raw.append((dt, score))
+
+        if len(raw) < 2:
+            return None
+
+        raw.sort(key=lambda x: x[0])
+        score_vals = np.array([s for _, s in raw])
+        window_median = float(np.median(score_vals))
+        scored = [(dt, s - window_median) for dt, s in raw]
+
+        max_jump = 0.0
+        max_idx = -1
+        for i in range(len(scored) - 1):
+            jump = abs(scored[i + 1][1] - scored[i][1])
+            if jump > max_jump:
+                max_jump = jump
+                max_idx = i
+
+        if max_idx < 0:
+            return None
+
+        pre_dt = scored[max_idx][0]
+        post_dt = scored[max_idx + 1][0]
+        event_dt = pre_dt + (post_dt - pre_dt) / 2
+        return pre_dt, post_dt, event_dt
+
+    except Exception:
+        return None
+
+
+def _intersect_windows(w1, w2):
+    """Intersect two (pre, post, event) windows. Returns None if disjoint."""
+    if w1 is None or w2 is None:
+        return None
+    pre1, post1, _ = w1
+    pre2, post2, _ = w2
+    overlap_pre = max(pre1, pre2)
+    overlap_post = min(post1, post2)
+    if overlap_post <= overlap_pre:
+        return None
+    event_dt = overlap_pre + (overlap_post - overlap_pre) / 2
+    return overlap_pre, overlap_post, event_dt
+
+
+def refine_event_window_s1(geom, coarse_iv_start, coarse_iv_end, cfg):
+    """
+    Tighten a coarse event window using Sentinel-1 SAR backscatter changes.
+
+    Ascending and descending orbits are processed as independent time series
+    (they see the scene from different look angles and cannot be mixed).
+    The two per-orbit windows are then intersected to form a single S1 window.
+    """
+    strategy = cfg.get("s1_orbit_strategy", "both")
+
+    if strategy == "ascending":
+        return _refine_s1_single_orbit(
+            geom, coarse_iv_start, coarse_iv_end, "ASCENDING", cfg
+        )
+    if strategy == "descending":
+        return _refine_s1_single_orbit(
+            geom, coarse_iv_start, coarse_iv_end, "DESCENDING", cfg
+        )
+
+    asc = _refine_s1_single_orbit(
+        geom, coarse_iv_start, coarse_iv_end, "ASCENDING", cfg
+    )
+    desc = _refine_s1_single_orbit(
+        geom, coarse_iv_start, coarse_iv_end, "DESCENDING", cfg
+    )
+    if asc is None and desc is None:
+        return None
+    if asc is None:
+        return desc
+    if desc is None:
+        return asc
+    return _intersect_windows(asc, desc)
+
+
+def _pick_event_day_prism(geom, pre_dt, post_dt, cfg):
+    """
+    Pick a specific event day inside [pre_dt, post_dt] using PRISM daily precip.
+
+    Returns the date with the maximum daily precipitation. Returns None if
+    PRISM returns no data or all daily values are zero (caller interprets
+    this as 'fall back to coarse').
+    """
+    try:
+        centroid = geom.centroid
+        ee_point = ee.Geometry.Point([centroid.x, centroid.y])
+
+        if (post_dt - pre_dt).days <= 1:
+            return pre_dt
+
+        start_str = pre_dt.strftime("%Y-%m-%d")
+        end_str = (post_dt + timedelta(days=1)).strftime("%Y-%m-%d")
+
+        collection = (
+            ee.ImageCollection(cfg["prism_dataset"])
+            .filterDate(start_str, end_str)
+            .select("ppt")
+        )
+
+        def per_image_ppt(image):
+            stats = image.reduceRegion(
+                reducer=ee.Reducer.mean(),
+                geometry=ee_point,
+                scale=4000,
+                maxPixels=1e6,
+            )
+            return ee.Feature(
+                None,
+                {
+                    "date": image.date().format("YYYY-MM-dd"),
+                    "ppt": stats.get("ppt"),
+                },
+            )
+
+        feats = collection.map(per_image_ppt).getInfo()["features"]
+        if not feats:
+            return None
+
+        best_day = None
+        best_ppt = 0.0
+        for f in feats:
+            props = f["properties"]
+            date_str = props.get("date")
+            ppt = props.get("ppt")
+            if not date_str or ppt is None:
+                continue
+            if ppt > best_ppt:
+                best_ppt = ppt
+                try:
+                    best_day = parser.parse(date_str)
+                except Exception:
+                    continue
+
+        if best_day is None or best_ppt <= 0.0:
+            return None
+        return best_day
+
+    except Exception:
+        return None
+
+
 def get_local_reference_baseline(geom, gdf, idx, ign_date, search_start, cfg):
     try:
         import warnings
@@ -493,21 +709,56 @@ def detect_change_event(ts, cfg, ref_std=None, geom=None):
         candidate_end = coarse_iv_end
         candidate_date = scores[i + 1]["end_dt"]
         refined = False
+        refinement_mode = "coarse"
 
         change_score = float(diffs[i])
         obs_count = scores[i + 1].get("count", 0)
 
-        # Two-pass refinement: find the specific adjacent pair of clear
-        # acquisitions that straddle the jump. Localizes the event from
-        # ~60 days to the Sentinel-2 revisit cadence (~5-15 days).
         if geom is not None and cfg.get("refine_events", True):
-            r = refine_event_window(geom, coarse_iv_start, coarse_iv_end, cfg)
-            if r is not None:
-                pre_dt, post_dt, event_dt = r
+            s2_win = refine_event_window(
+                geom, coarse_iv_start, coarse_iv_end, cfg
+            )
+            s1_win = None
+            if cfg.get("use_s1_refinement", False):
+                s1_win = refine_event_window_s1(
+                    geom, coarse_iv_start, coarse_iv_end, cfg
+                )
+
+            chosen = None
+            if s2_win is not None and s1_win is not None:
+                agreement = _intersect_windows(s2_win, s1_win)
+                if agreement is not None:
+                    chosen = agreement
+                    refinement_mode = "s2+s1"
+                # else: disagree -> coarse fallback
+            elif s2_win is not None:
+                chosen = s2_win
+                refinement_mode = "s2"
+            elif s1_win is not None:
+                chosen = s1_win
+                refinement_mode = "s1"
+
+            if chosen is not None:
+                pre_dt, post_dt, event_dt = chosen
                 candidate_start = pre_dt
                 candidate_end = post_dt
                 candidate_date = event_dt
                 refined = True
+
+                # Precip day-picker only runs when S2 and S1 agree
+                if refinement_mode == "s2+s1":
+                    picked_day = _pick_event_day_prism(
+                        geom, pre_dt, post_dt, cfg
+                    )
+                    if picked_day is not None:
+                        candidate_date = picked_day
+                    else:
+                        # Zero-precip fallback: collapse to coarse
+                        candidate_start = coarse_iv_start
+                        candidate_end = coarse_iv_end
+                        candidate_date = scores[i + 1]["end_dt"]
+                        refined = False
+                        refinement_mode = "coarse"
 
         confidence = compute_confidence(change_score, threshold, obs_count)
 
@@ -519,6 +770,7 @@ def detect_change_event(ts, cfg, ref_std=None, geom=None):
                 change_score,
                 confidence,
                 refined,
+                refinement_mode,
             )
         )
 
@@ -644,9 +896,23 @@ def run(
             log(f"  Polygon {idx}: No valid event detected")
             continue
 
-        event_date, start_date, end_date, change_score, confidence, refined = event
+        (
+            event_date,
+            start_date,
+            end_date,
+            change_score,
+            confidence,
+            refined,
+            refinement_mode,
+        ) = event
         window_days = (end_date - start_date).days
-        tag = "refined" if refined else "coarse"
+        tag_map = {
+            "coarse": "coarse",
+            "s2": "refined",
+            "s1": "refined-s1",
+            "s2+s1": "refined+s1",
+        }
+        tag = tag_map.get(refinement_mode, "coarse")
 
         if all_events and len(all_events) > 1:
             other_dates = [e[0].strftime("%Y-%m-%d") for e in all_events[1:]]
