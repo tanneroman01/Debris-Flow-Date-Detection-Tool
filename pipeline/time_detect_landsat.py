@@ -33,6 +33,9 @@ DEFAULTS = {
     "local_ref_outer_buffer_m": 500,
     "local_ref_scale": 30,
     "local_ref_min_area_m2": 50000,
+    "refine_events": True,
+    "refine_margin_days": 15,
+    "refine_scale": 30,
 }
 
 # Output field names
@@ -331,6 +334,114 @@ def compute_change_scores(ts, cfg):
     return results
 
 
+def _fetch_individual_acquisitions(ee_polygon, start_str, end_str, cfg):
+    """Pull per-acquisition polygon-mean NBR/NDVI/RED/NDSI (no compositing)."""
+    collection = _build_landsat_collection(start_str, end_str, ee_polygon, cfg)
+
+    def per_image_stats(image):
+        nbr = image.normalizedDifference(["NIR", "SWIR2"]).rename("NBR")
+        ndvi = image.normalizedDifference(["NIR", "RED"]).rename("NDVI")
+        ndsi = image.normalizedDifference(["GREEN", "SWIR1"]).rename("NDSI")
+        combined = (
+            image.select(["RED"]).addBands(nbr).addBands(ndvi).addBands(ndsi)
+        )
+        stats = combined.reduceRegion(
+            reducer=ee.Reducer.mean(),
+            geometry=ee_polygon,
+            scale=cfg["refine_scale"],
+            maxPixels=1e7,
+        )
+        return ee.Feature(
+            None,
+            {
+                "date": image.date().format("YYYY-MM-dd"),
+                "B04": stats.get("RED"),
+                "NBR": stats.get("NBR"),
+                "NDVI": stats.get("NDVI"),
+                "NDSI": stats.get("NDSI"),
+            },
+        )
+
+    feats = collection.map(per_image_stats).getInfo()["features"]
+    return [f["properties"] for f in feats]
+
+
+def refine_event_window(geom, coarse_iv_start, coarse_iv_end, cfg):
+    """
+    Tighten a coarse event window using individual Landsat acquisitions.
+
+    Pulls every cloud-free acquisition in the coarse window (extended by
+    ``refine_margin_days`` on both sides), scores each one with the same
+    composite weights used for the coarse pass, and returns the adjacent
+    pair with the largest jump in score.
+    """
+    try:
+        ee_polygon = _shapely_to_ee_geometry(geom)
+        margin = cfg.get("refine_margin_days", 15)
+        start_str = (coarse_iv_start - timedelta(days=margin)).strftime("%Y-%m-%d")
+        end_str = (coarse_iv_end + timedelta(days=margin)).strftime("%Y-%m-%d")
+
+        acquisitions = _fetch_individual_acquisitions(
+            ee_polygon, start_str, end_str, cfg
+        )
+        if not acquisitions or len(acquisitions) < 2:
+            return None
+
+        scored = []
+        for acq in acquisitions:
+            date_str = acq.get("date")
+            if not date_str:
+                continue
+            nbr = acq.get("NBR")
+            ndvi = acq.get("NDVI")
+            b04 = acq.get("B04")
+            ndsi = acq.get("NDSI")
+            if nbr is None and ndvi is None:
+                continue
+            if ndsi is not None and ndsi > cfg["ndsi_snow_threshold"]:
+                continue
+            nbr_v = nbr if nbr is not None else 0.0
+            ndvi_v = ndvi if ndvi is not None else 0.0
+            b04_v = b04 if b04 is not None else 0.0
+            nbr_norm = (nbr_v + 1.0) / 2.0
+            ndvi_norm = (ndvi_v + 1.0) / 2.0
+            b04_norm = 1.0 - max(0.0, min(1.0, b04_v / 0.15))
+            score = (
+                cfg["weight_dnbr"] * nbr_norm
+                + cfg["weight_ndvi"] * ndvi_norm
+                + cfg["weight_b04"] * b04_norm
+            )
+            try:
+                dt = parser.parse(date_str)
+            except Exception:
+                continue
+            scored.append((dt, score))
+
+        if len(scored) < 2:
+            return None
+
+        scored.sort(key=lambda x: x[0])
+
+        max_jump = 0.0
+        max_idx = -1
+        for i in range(len(scored) - 1):
+            jump = abs(scored[i + 1][1] - scored[i][1])
+            if jump > max_jump:
+                max_jump = jump
+                max_idx = i
+
+        if max_idx < 0:
+            return None
+
+        pre_dt = scored[max_idx][0]
+        post_dt = scored[max_idx + 1][0]
+        event_dt = pre_dt + (post_dt - pre_dt) / 2
+        return pre_dt, post_dt, event_dt
+
+    except Exception:
+        return None
+
+
 def get_local_reference_baseline(geom, gdf, idx, ign_date, search_start, cfg):
     try:
         import warnings
@@ -435,10 +546,29 @@ def detect_change_event(ts, cfg, ref_std=None, geom=None):
         if diffs[i] < threshold:
             continue
 
+        # Honest coarse bounds: the event could lie anywhere inside the two
+        # adjacent composite intervals, not just between their end dates.
+        coarse_iv_start = parser.parse(scores[i]["interval_start"])
+        coarse_iv_end = parser.parse(scores[i + 1]["interval_end"])
+        candidate_start = coarse_iv_start
+        candidate_end = coarse_iv_end
         candidate_date = scores[i + 1]["end_dt"]
-        candidate_start = scores[i]["end_dt"]
+        refined = False
+
         change_score = float(diffs[i])
         obs_count = scores[i + 1].get("count", 0)
+
+        # Two-pass refinement: find the specific adjacent pair of clear
+        # acquisitions that straddle the jump. Localizes the event from
+        # ~60 days to the Landsat revisit cadence (~8-16 days).
+        if geom is not None and cfg.get("refine_events", True):
+            r = refine_event_window(geom, coarse_iv_start, coarse_iv_end, cfg)
+            if r is not None:
+                pre_dt, post_dt, event_dt = r
+                candidate_start = pre_dt
+                candidate_end = post_dt
+                candidate_date = event_dt
+                refined = True
 
         confidence = compute_confidence(change_score, threshold, obs_count)
 
@@ -446,9 +576,10 @@ def detect_change_event(ts, cfg, ref_std=None, geom=None):
             (
                 candidate_date,
                 candidate_start,
-                candidate_date,
+                candidate_end,
                 change_score,
                 confidence,
+                refined,
             )
         )
 
@@ -574,18 +705,22 @@ def run(
             log(f"  Polygon {idx}: No valid event detected")
             continue
 
-        event_date, start_date, end_date, change_score, confidence = event
+        event_date, start_date, end_date, change_score, confidence, refined = event
+        window_days = (end_date - start_date).days
+        tag = "refined" if refined else "coarse"
 
         if all_events and len(all_events) > 1:
             other_dates = [e[0].strftime("%Y-%m-%d") for e in all_events[1:]]
             log(
                 f"  Polygon {idx}: Event {event_date.strftime('%Y-%m-%d')} "
+                f"[{tag}, +/-{window_days}d] "
                 f"(score: {change_score:.4f}, conf: {confidence}) "
                 f"[+{len(all_events)-1} more: {', '.join(other_dates)}]"
             )
         else:
             log(
                 f"  Polygon {idx}: Event {event_date.strftime('%Y-%m-%d')} "
+                f"[{tag}, +/-{window_days}d] "
                 f"(score: {change_score:.4f}, conf: {confidence})"
             )
 
