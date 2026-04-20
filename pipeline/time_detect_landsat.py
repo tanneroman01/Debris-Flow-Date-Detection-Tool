@@ -422,12 +422,12 @@ def refine_event_window(geom, coarse_iv_start, coarse_iv_end, cfg):
 
         scored.sort(key=lambda x: x[0])
 
-        max_jump = 0.0
+        max_drop = 0.0
         max_idx = -1
         for i in range(len(scored) - 1):
-            jump = abs(scored[i + 1][1] - scored[i][1])
-            if jump > max_jump:
-                max_jump = jump
+            drop = scored[i][1] - scored[i + 1][1]  # positive when score drops
+            if drop > max_drop:
+                max_drop = drop
                 max_idx = i
 
         if max_idx < 0:
@@ -534,7 +534,7 @@ def detect_change_event(ts, cfg, ref_std=None, geom=None):
         return None
 
     raw_scores = np.array([s["score"] for s in scores])
-    diffs = np.abs(np.diff(raw_scores))
+    diffs = np.diff(raw_scores)
 
     if ref_std is not None and ref_std > 1e-6:
         threshold = ref_std * cfg["baseline_multiplier"]
@@ -543,7 +543,7 @@ def detect_change_event(ts, cfg, ref_std=None, geom=None):
 
     all_events = []
     for i in range(len(diffs)):
-        if diffs[i] < threshold:
+        if diffs[i] >= 0 or abs(diffs[i]) < threshold:
             continue
 
         # Honest coarse bounds: the event could lie anywhere inside the two
@@ -555,7 +555,7 @@ def detect_change_event(ts, cfg, ref_std=None, geom=None):
         candidate_date = scores[i + 1]["end_dt"]
         refined = False
 
-        change_score = float(diffs[i])
+        change_score = float(abs(diffs[i]))
         obs_count = scores[i + 1].get("count", 0)
 
         # Two-pass refinement: find the specific adjacent pair of clear
