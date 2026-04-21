@@ -36,6 +36,10 @@ DEFAULTS = {
     "refine_events": True,
     "refine_margin_days": 15,
     "refine_scale": 30,
+    # PRISM precipitation validation
+    "prism_dataset": "OREGONSTATE/PRISM/AN81d",
+    "precip_min_mm": 10.0,
+    "precip_window_pad_days": 5,
 }
 
 # Output field names
@@ -442,6 +446,51 @@ def refine_event_window(geom, coarse_iv_start, coarse_iv_end, cfg):
         return None
 
 
+def _validate_precip(geom, coarse_iv_start, coarse_iv_end, cfg):
+    """Check whether significant precipitation occurred in a coarse event window.
+
+    Returns True if any day in the window has precip >= precip_min_mm,
+    or True on query failure (fail-open).
+    """
+    try:
+        centroid = geom.centroid
+        ee_point = ee.Geometry.Point([centroid.x, centroid.y])
+
+        pad = cfg.get("precip_window_pad_days", 5)
+        start_str = (coarse_iv_start - timedelta(days=pad)).strftime("%Y-%m-%d")
+        end_str = (coarse_iv_end + timedelta(days=pad + 1)).strftime("%Y-%m-%d")
+
+        collection = (
+            ee.ImageCollection(cfg["prism_dataset"])
+            .filterDate(start_str, end_str)
+            .select("ppt")
+        )
+
+        def per_image_ppt(image):
+            stats = image.reduceRegion(
+                reducer=ee.Reducer.mean(),
+                geometry=ee_point,
+                scale=4000,
+                maxPixels=1e6,
+            )
+            return ee.Feature(None, {"ppt": stats.get("ppt")})
+
+        feats = collection.map(per_image_ppt).getInfo()["features"]
+        if not feats:
+            return True  # fail-open
+
+        min_mm = cfg.get("precip_min_mm", 10.0)
+        for f in feats:
+            ppt = f["properties"].get("ppt")
+            if ppt is not None and ppt >= min_mm:
+                return True
+
+        return False
+
+    except Exception:
+        return True  # fail-open
+
+
 def get_local_reference_baseline(geom, gdf, idx, ign_date, search_start, cfg):
     try:
         import warnings
@@ -541,15 +590,32 @@ def detect_change_event(ts, cfg, ref_std=None, geom=None):
     else:
         threshold = cfg["fallback_abs_threshold"]
 
-    all_events = []
+    # Collect coarse candidates (DOWN exceedances) before refinement
+    candidates = []
     for i in range(len(diffs)):
         if diffs[i] >= 0 or abs(diffs[i]) < threshold:
             continue
-
-        # Honest coarse bounds: the event could lie anywhere inside the two
-        # adjacent composite intervals, not just between their end dates.
         coarse_iv_start = parser.parse(scores[i]["interval_start"])
         coarse_iv_end = parser.parse(scores[i + 1]["interval_end"])
+        candidates.append((i, coarse_iv_start, coarse_iv_end))
+
+    if not candidates:
+        return None
+
+    # Precipitation validation: accept candidates with significant rainfall,
+    # fall back to first candidate if none pass.
+    validated = candidates
+    if geom is not None and cfg.get("precip_min_mm", 0) > 0:
+        passed = [
+            c for c in candidates
+            if _validate_precip(geom, c[1], c[2], cfg)
+        ]
+        if passed:
+            validated = passed
+
+    # Build final events from validated candidates (with refinement)
+    all_events = []
+    for i, coarse_iv_start, coarse_iv_end in validated:
         candidate_start = coarse_iv_start
         candidate_end = coarse_iv_end
         candidate_date = scores[i + 1]["end_dt"]

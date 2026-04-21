@@ -141,7 +141,7 @@ with st.sidebar:
         )
         fire_name = st.text_input("Fire name", help="e.g. Cameron Peak")
         fire_year = st.text_input("Fire year", value=str(date.today().year))
-        ign_date_input = st.date_input("Ignition date")
+        ign_date_input = st.date_input("Ignition date", min_value = date(1990, 1, 1))
         ign_date_str = ign_date_input.strftime("%m/%d/%Y") if ign_date_input else ""
 
     obs_date = st.date_input("Date Mapped", value=date.today())
