@@ -137,4 +137,75 @@ def run_full_pipeline(
     log(f"Output: {merged_shp}")
     log("=" * 50)
 
-    return merged_shp 
+    return merged_shp
+
+
+def run_date_detection_only(
+    polygons_shp: str,
+    ign_date_str: str,
+    gee_project: str,
+    output_dir: str,
+    gee_credentials: str = None,
+    detection_params: dict = None,
+    sensor: str = "sentinel2",
+    log=print,
+    progress_callback=None,
+) -> str:
+    """
+    Run only the date detection step on an existing polygon shapefile.
+
+    Args:
+        polygons_shp: Path to polygon shapefile
+        ign_date_str: Fire ignition date as MM/DD/YYYY
+        gee_project: GEE cloud project ID
+        output_dir: Directory for output
+        gee_credentials: Optional GEE credentials JSON string
+        detection_params: Optional dict overriding detection parameters
+        sensor: "sentinel2" (default) or "landsat"
+        log: Logging function
+        progress_callback: Optional callable(step, step_name, pct)
+
+    Returns:
+        Path to output timepolygons.shp
+    """
+    os.makedirs(output_dir, exist_ok=True)
+
+    if sensor == "landsat":
+        from pipeline import time_detect_landsat as time_detect
+    else:
+        from pipeline import time_detect
+
+    def update_progress(step, name, pct=None):
+        if progress_callback:
+            progress_callback(step, name, pct)
+
+    update_progress(1, "Detecting debris flow dates (GEE)")
+    log("=" * 50)
+    log("Date Detection (GEE)")
+    log("=" * 50)
+
+    time_shp = os.path.join(output_dir, "timepolygons.shp")
+
+    def time_progress(current, total):
+        if progress_callback:
+            pct = current / total if total > 0 else 0
+            progress_callback(1, f"Processing polygon {current}/{total}", pct)
+
+    time_detect.run(
+        polygons_shp=polygons_shp,
+        output_shp=time_shp,
+        ign_date_str=ign_date_str,
+        gee_project=gee_project,
+        gee_credentials=gee_credentials,
+        params=detection_params,
+        log=log,
+        progress_callback=time_progress,
+    )
+
+    update_progress(1, "Complete", 1.0)
+    log("\n" + "=" * 50)
+    log("DATE DETECTION COMPLETE")
+    log(f"Output: {time_shp}")
+    log("=" * 50)
+
+    return time_shp

@@ -23,8 +23,11 @@ from pipeline import orchestrator
 # page configuration
 st.set_page_config(
     page_title="Debris Flow Date Detection Tool",
-    page_icon="🏔️",
+    page_icon=":cloud_with_lightning_and_rain:",
     layout="wide",
+    menu_items={
+        'Report a bug': "mailto:tanner.oman01@gmail.com" 
+    }
 )
 
 # paths to bundled data (defaults, template, roads)
@@ -86,10 +89,15 @@ fire_keys = [k for k in fire_db.keys() if not k.startswith("_")] if fire_db else
 
 # ── Header ──
 st.title("Debris Flow Date Detection Tool")
-st.markdown(
-    "Post-fire debris flow inventory pipeline. Upload your KML with mapped polygons for debris flow/landslide deposits, outlets, initiation points, or other features, as well as a fire boundary shapefile."
-    "Provide fire metadata (select from dropdown) and provide your Google Earth Enginge Project ID, and get back a fully attributed shapefile with detected event dates."
-)
+st.markdown("Do you know where post-fire debris flows occurred, but want to know when? " \
+"Upload your KML with mapped polygons for debris flow/landslide deposits, outlets, initiation points,"
+"or other features, as well as a fire boundary shapefile. Provide your Google Earth Enginge Project ID, "
+"and get back a fully attributed shapefile with detected event dates.")
+sentiment_mapping = ["one", "two", "three", "four", "five"]
+selected = st.feedback("stars")
+if selected is not None:
+    st.markdown(f"You selected {sentiment_mapping[selected]} stars.")
+    
 
 # ── Sidebar: GEE project ID,  ──
 with st.sidebar:
@@ -146,26 +154,46 @@ with st.sidebar:
     obs_date = st.date_input("Date Mapped", value=date.today())
     obs_date_str = obs_date.strftime("%Y-%m-%d")
 
+# ── Mode selection ──
+run_mode = st.radio(
+    "Pipeline mode",
+    ["Full Pipeline", "Date Detection Only"],
+    horizontal=True,
+    help="Full Pipeline: KML → attribution → date detection → merged output. "
+         "Date Detection Only: run date detection on an existing polygon shapefile.",
+)
+
 # ── Main area: File uploads ──
 st.header("Input Files")
 
-col1, col2 = st.columns(2)
+if run_mode == "Full Pipeline":
+    col1, col2 = st.columns(2)
 
-with col1:
-    st.subheader("1. Debris-Flow Feature KML")
-    kml_file = st.file_uploader(
-        "Upload KML with mapped polygons",
-        type=["kml"],
-        help="Export from Google Earth with your digitized debris flow polygons",
-    )
+    with col1:
+        st.subheader("1. Debris-Flow Feature KML")
+        kml_file = st.file_uploader(
+            "Upload KML with mapped polygons",
+            type=["kml"],
+            help="Export from Google Earth with your digitized debris flow polygons",
+        )
 
-with col2:
-    st.subheader("2. Fire Boundary")
-    fire_boundary_files = st.file_uploader(
-        "Upload fire boundary shapefile",
+    with col2:
+        st.subheader("2. Fire Boundary")
+        fire_boundary_files = st.file_uploader(
+            "Upload fire boundary shapefile",
+            type=["shp", "shx", "dbf", "prj", "cpg"],
+            accept_multiple_files=True,
+            help="Upload all shapefile components (.shp, .shx, .dbf, .prj)",
+        )
+else:
+    kml_file = None
+    fire_boundary_files = None
+    st.subheader("Polygon Shapefile")
+    polygon_shp_files = st.file_uploader(
+        "Upload polygon shapefile",
         type=["shp", "shx", "dbf", "prj", "cpg"],
         accept_multiple_files=True,
-        help="Upload all shapefile components (.shp, .shx, .dbf, .prj)",
+        help="Upload all shapefile components (.shp, .shx, .dbf, .prj) for your debris flow polygons",
     )
 
 # Raise warnings if required inputs are missing or if the shapefile upload doesn't include a .shp file
@@ -175,30 +203,41 @@ issues = []
 if not gee_project:
     issues.append("Enter your GEE Cloud Project ID in the sidebar")
     ready = False
-if not kml_file:
-    issues.append("Upload a KML file with deposit polygons")
-    ready = False
-if not fire_boundary_files:
-    issues.append("Upload fire boundary shapefile components")
-    ready = False
-if not fire_key:
-    issues.append("Select or enter a fire key")
-    ready = False
 if not ign_date_str:
     issues.append("Provide an ignition date")
     ready = False
 
-has_shp = any(f.name.endswith(".shp") for f in fire_boundary_files) if fire_boundary_files else False
-if fire_boundary_files and not has_shp:
-    issues.append("Fire boundary upload must include a .shp file")
-    ready = False
+if run_mode == "Full Pipeline":
+    if not kml_file:
+        issues.append("Upload a KML file with deposit polygons")
+        ready = False
+    if not fire_boundary_files:
+        issues.append("Upload fire boundary shapefile components")
+        ready = False
+    if not fire_key:
+        issues.append("Select or enter a fire key")
+        ready = False
 
-if not os.path.exists(ROADS_SHP):
-    issues.append(f"Roads shapefile not found at: {ROADS_SHP}")
-    ready = False
-if not os.path.exists(TEMPLATE_SHP):
-    issues.append(f"CDOT template not found at: {TEMPLATE_SHP}")
-    ready = False
+    has_shp = any(f.name.endswith(".shp") for f in fire_boundary_files) if fire_boundary_files else False
+    if fire_boundary_files and not has_shp:
+        issues.append("Fire boundary upload must include a .shp file")
+        ready = False
+
+    if not os.path.exists(ROADS_SHP):
+        issues.append(f"Roads shapefile not found at: {ROADS_SHP}")
+        ready = False
+    if not os.path.exists(TEMPLATE_SHP):
+        issues.append(f"CDOT template not found at: {TEMPLATE_SHP}")
+        ready = False
+else:
+    if not polygon_shp_files:
+        issues.append("Upload polygon shapefile components")
+        ready = False
+    else:
+        has_shp = any(f.name.endswith(".shp") for f in polygon_shp_files)
+        if not has_shp:
+            issues.append("Polygon shapefile upload must include a .shp file")
+            ready = False
 
 if issues:
     for issue in issues:
@@ -215,42 +254,6 @@ if st.button("Run Tool", type="primary", disabled=not ready, use_container_width
     os.makedirs(upload_dir)
     os.makedirs(output_dir)
 
-    # Save uploaded files
-    kml_path = save_uploaded_file(kml_file, upload_dir)
-    fire_bndy_path = save_uploaded_shapefile(fire_boundary_files, upload_dir, "fire_boundary")
-
-    if fire_bndy_path is None:
-        st.error("Could not find .shp file in fire boundary upload")
-        st.stop()
-
-    # If fire key not in database, create a temporary fire_defaults with user inputs
-    if use_existing and fire_db:
-        patched_db = dict(fire_db) # shallow copy
-        patched_db["_constants"] = dict(patched_db.get("_constants", {}))
-        patched_db["_constants"]["OBS_USER"] = obs_user
-        fd_path = os.path.join(upload_dir, "fire_defaults.json")
-        with open(fd_path, "w") as f:
-            json.dump(patched_db, f, indent=2)
-    else:
-        temp_db = {
-            "_constants": fire_db.get("_constants", {}) if fire_db else {
-                "OBS_USER": obs_user,
-                "COUNTRY": "United States",
-                "STATE": "",
-                "HAZ_TYPE": "Channelized Sediment Flow",
-                "ID_METHOD": "Satellite Imagery",
-                "FIRE_SRC": "MTBS",
-            },
-            fire_key: {
-                "FIRENAME": fire_name,
-                "FIRE_YEAR": fire_year,
-                "IGN_DATE": ign_date_str,
-            },
-        }
-        fd_path = os.path.join(upload_dir, "fire_defaults.json")
-        with open(fd_path, "w") as f:
-            json.dump(temp_db, f, indent=2)
-
     # Progress display
     progress_bar = st.progress(0, text="Starting process...")
     log_container = st.container()
@@ -261,45 +264,107 @@ if st.button("Run Tool", type="primary", disabled=not ready, use_container_width
         with log_container:
             st.code("\n".join(log_lines[-30:]), language="text")
 
-    step_weights = {1: 0.05, 2: 0.15, 3: 0.70, 4: 0.10}
-    step_starts = {1: 0.0, 2: 0.05, 3: 0.20, 4: 0.90}
-
-    def progress_callback(step, name, pct=None):
-        base = step_starts.get(step, 0)
-        weight = step_weights.get(step, 0.1)
-        if pct is not None:
-            total_pct = base + weight * pct
-        else:
-            total_pct = base
-        progress_bar.progress(min(total_pct, 1.0), text=f"Step {step}: {name}")
-
     try:
-        merged_path = orchestrator.run_full_pipeline(
-            kml_path=kml_path,
-            fire_boundary_path=fire_bndy_path,
-            roads_shp=ROADS_SHP,
-            template_shp=TEMPLATE_SHP,
-            fire_defaults_path=fd_path,
-            fire_key=fire_key,
-            obs_date=obs_date_str,
-            gee_project=gee_project,
-            gee_credentials=gee_credentials or None,
-            detection_params=None,
-            sensor=sensor_key,
-            output_dir=output_dir,
-            log=ui_log,
-            progress_callback=progress_callback,
-        )
+        if run_mode == "Date Detection Only":
+            # Save uploaded polygon shapefile
+            poly_shp_path = save_uploaded_shapefile(polygon_shp_files, upload_dir, "polygons")
+            if poly_shp_path is None:
+                st.error("Could not find .shp file in polygon shapefile upload")
+                st.stop()
+
+            def dd_progress_callback(step, name, pct=None):
+                if pct is not None:
+                    progress_bar.progress(min(pct, 1.0), text=name)
+                else:
+                    progress_bar.progress(0, text=name)
+
+            result_path = orchestrator.run_date_detection_only(
+                polygons_shp=poly_shp_path,
+                ign_date_str=ign_date_str,
+                gee_project=gee_project,
+                gee_credentials=gee_credentials or None,
+                detection_params=None,
+                sensor=sensor_key,
+                output_dir=output_dir,
+                log=ui_log,
+                progress_callback=dd_progress_callback,
+            )
+        else:
+            # Save uploaded files
+            kml_path = save_uploaded_file(kml_file, upload_dir)
+            fire_bndy_path = save_uploaded_shapefile(fire_boundary_files, upload_dir, "fire_boundary")
+
+            if fire_bndy_path is None:
+                st.error("Could not find .shp file in fire boundary upload")
+                st.stop()
+
+            # If fire key not in database, create a temporary fire_defaults with user inputs
+            if use_existing and fire_db:
+                patched_db = dict(fire_db) # shallow copy
+                patched_db["_constants"] = dict(patched_db.get("_constants", {}))
+                patched_db["_constants"]["OBS_USER"] = obs_user
+                fd_path = os.path.join(upload_dir, "fire_defaults.json")
+                with open(fd_path, "w") as f:
+                    json.dump(patched_db, f, indent=2)
+            else:
+                temp_db = {
+                    "_constants": fire_db.get("_constants", {}) if fire_db else {
+                        "OBS_USER": obs_user,
+                        "COUNTRY": "United States",
+                        "STATE": "",
+                        "HAZ_TYPE": "Channelized Sediment Flow",
+                        "ID_METHOD": "Satellite Imagery",
+                        "FIRE_SRC": "MTBS",
+                    },
+                    fire_key: {
+                        "FIRENAME": fire_name,
+                        "FIRE_YEAR": fire_year,
+                        "IGN_DATE": ign_date_str,
+                    },
+                }
+                fd_path = os.path.join(upload_dir, "fire_defaults.json")
+                with open(fd_path, "w") as f:
+                    json.dump(temp_db, f, indent=2)
+
+            step_weights = {1: 0.05, 2: 0.15, 3: 0.70, 4: 0.10}
+            step_starts = {1: 0.0, 2: 0.05, 3: 0.20, 4: 0.90}
+
+            def fp_progress_callback(step, name, pct=None):
+                base = step_starts.get(step, 0)
+                weight = step_weights.get(step, 0.1)
+                if pct is not None:
+                    total_pct = base + weight * pct
+                else:
+                    total_pct = base
+                progress_bar.progress(min(total_pct, 1.0), text=f"Step {step}: {name}")
+
+            result_path = orchestrator.run_full_pipeline(
+                kml_path=kml_path,
+                fire_boundary_path=fire_bndy_path,
+                roads_shp=ROADS_SHP,
+                template_shp=TEMPLATE_SHP,
+                fire_defaults_path=fd_path,
+                fire_key=fire_key,
+                obs_date=obs_date_str,
+                gee_project=gee_project,
+                gee_credentials=gee_credentials or None,
+                detection_params=None,
+                sensor=sensor_key,
+                output_dir=output_dir,
+                log=ui_log,
+                progress_callback=fp_progress_callback,
+            )
 
         progress_bar.progress(1.0, text="Process complete!")
         st.success("Process finished successfully!")
 
         # Create downloadable zip
         zip_buf = create_download_zip(output_dir)
+        download_name = f"{fire_key}_debris_flow_results.zip" if fire_key else "date_detection_results.zip"
         st.download_button(
             label="Download Results (ZIP)",
             data=zip_buf,
-            file_name=f"{fire_key}_debris_flow_results.zip",
+            file_name=download_name,
             mime="application/zip",
             type="primary",
             use_container_width=True,
@@ -308,8 +373,8 @@ if st.button("Run Tool", type="primary", disabled=not ready, use_container_width
         # Preview results
         import geopandas as _gpd
 
-        if os.path.exists(merged_path):
-            result_gdf = _gpd.read_file(merged_path)
+        if os.path.exists(result_path):
+            result_gdf = _gpd.read_file(result_path)
             st.subheader("Results Preview")
 
             preview_cols = [
@@ -330,6 +395,6 @@ if st.button("Run Tool", type="primary", disabled=not ready, use_container_width
 # ── Footer ──
 st.divider()
 st.caption(
-    "Debris Flow Detection Tool | CDOT Project | "
-    "Powered by Google Earth Engine, Sentinel-2, Landsat, Streamlit, OpenStreetMap, and more. Developed by Tanner Oman"
+    "Debris Flow Date Detection Tool | CDOT Project | "
+    "Powered by Google Earth Engine, Sentinel-2, Sentinel-1m Landsat, Streamlit, OpenStreetMap, and more. Developed by Tanner Oman"
 )
