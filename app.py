@@ -26,7 +26,7 @@ st.set_page_config(
     page_icon=":cloud_with_lightning_and_rain:",
     layout="wide",
     menu_items={
-        'Report a bug': "mailto:tanner.oman01@gmail.com" 
+        'Report a bug': "https://github.com/tanneroman01/Debris-Flow-Date-Detection-Tool/issues" 
     }
 )
 
@@ -107,13 +107,6 @@ with st.sidebar:
         "GEE Cloud Project ID",
         value="",
         help="Your Google Earth Engine cloud project ID (e.g., 'my-gee-project-12345')",
-    )
-
-    gee_credentials = st.text_area(
-        "GEE Credentials JSON",
-        value="",
-        height=100,
-        help="Paste the contents of ~/.config/earthengine/credentials (run 'earthengine authenticate' locally to generate it)",
     )
 
     st.divider()
@@ -396,5 +389,5 @@ if st.button("Run Tool", type="primary", disabled=not ready, use_container_width
 st.divider()
 st.caption(
     "Debris Flow Date Detection Tool | CDOT Project | "
-    "Powered by Google Earth Engine, Sentinel-2, Sentinel-1m Landsat, Streamlit, OpenStreetMap, and more. Developed by Tanner Oman"
+    "Powered by Google Earth Engine, Sentinel-2, Sentinel-1, Landsat, Streamlit, OpenStreetMap, and more. Developed by Tanner Oman"
 )
