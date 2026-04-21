@@ -33,8 +33,7 @@ DEFAULTS = {
     "refine_events": True,
     "refine_margin_days": 15,
     "refine_scale": 10,
-    # Sentinel-1 SAR refinement (opt-in, experimental)
-    "use_s1_refinement": False,
+    # Sentinel-1 SAR refinement
     "s1_orbit_strategy": "both",  # "both" | "ascending" | "descending"
     "s1_weight_vv": 0.6,
     "s1_weight_vh": 0.4,
@@ -783,11 +782,9 @@ def detect_change_event(ts, cfg, ref_std=None, geom=None):
             s2_win = refine_event_window(
                 geom, coarse_iv_start, coarse_iv_end, cfg
             )
-            s1_win = None
-            if cfg.get("use_s1_refinement", False):
-                s1_win = refine_event_window_s1(
-                    geom, coarse_iv_start, coarse_iv_end, cfg
-                )
+            s1_win = refine_event_window_s1(
+                geom, coarse_iv_start, coarse_iv_end, cfg
+            )
 
             chosen = None
             if s2_win is not None and s1_win is not None:
