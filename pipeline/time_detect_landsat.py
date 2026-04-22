@@ -37,9 +37,11 @@ DEFAULTS = {
     "refine_margin_days": 15,
     "refine_scale": 30,
     # PRISM precipitation validation
-    "prism_dataset": "OREGONSTATE/PRISM/AN81d",
+    "prism_dataset": "OREGONSTATE/PRISM/ANd",
     "precip_min_mm": 10.0,
     "precip_window_pad_days": 5,
+    # Event selection: "first" | "max_score" | "max_precip"
+    "event_selection": "first",
 }
 
 # Output field names
@@ -491,6 +493,59 @@ def _validate_precip(geom, coarse_iv_start, coarse_iv_end, cfg):
         return True  # fail-open
 
 
+def _get_window_precip(geom, start_dt, end_dt, cfg):
+    """Return total precipitation (mm) in a window. Returns 0.0 on failure."""
+    try:
+        centroid = geom.centroid
+        ee_point = ee.Geometry.Point([centroid.x, centroid.y])
+        pad = cfg.get("precip_window_pad_days", 5)
+        start_str = (start_dt - timedelta(days=pad)).strftime("%Y-%m-%d")
+        end_str = (end_dt + timedelta(days=pad + 1)).strftime("%Y-%m-%d")
+        collection = (
+            ee.ImageCollection(cfg["prism_dataset"])
+            .filterDate(start_str, end_str)
+            .select("ppt")
+        )
+
+        def per_image_ppt(image):
+            stats = image.reduceRegion(
+                reducer=ee.Reducer.mean(),
+                geometry=ee_point,
+                scale=4000,
+                maxPixels=1e6,
+            )
+            return ee.Feature(None, {"ppt": stats.get("ppt")})
+
+        feats = collection.map(per_image_ppt).getInfo()["features"]
+        total = 0.0
+        for f in feats:
+            ppt = f["properties"].get("ppt")
+            if ppt is not None and ppt > 0:
+                total += ppt
+        return total
+    except Exception:
+        return 0.0
+
+
+def _select_event(all_events, cfg, geom=None):
+    """Pick one event from a list based on the configured selection strategy."""
+    if not all_events:
+        return None
+    strategy = cfg.get("event_selection", "first")
+    if strategy == "max_score" and len(all_events) > 1:
+        return max(all_events, key=lambda e: e[3])
+    if strategy == "max_precip" and len(all_events) > 1 and geom is not None:
+        best = all_events[0]
+        best_precip = -1.0
+        for ev in all_events:
+            total = _get_window_precip(geom, ev[1], ev[2], cfg)
+            if total > best_precip:
+                best_precip = total
+                best = ev
+        return best
+    return all_events[0]
+
+
 def get_local_reference_baseline(geom, gdf, idx, ign_date, search_start, cfg):
     try:
         import warnings
@@ -765,7 +820,7 @@ def run(
 
         # Detect events
         all_events = detect_change_event(ts, cfg, ref_std=ref_std, geom=geom)
-        event = all_events[0] if all_events else None
+        event = _select_event(all_events, cfg, geom=geom)
 
         if event is None:
             log(f"  Polygon {idx}: No valid event detected")

@@ -119,6 +119,25 @@ with st.sidebar:
     sensor_key = "landsat" if "Landsat" in sensor_choice else "sentinel2"
 
     st.divider()
+    st.subheader("Detection Parameters")
+    post_fire_buffer = st.number_input(
+        "Post-fire buffer (days)",
+        min_value=30,
+        max_value=730,
+        value=270,
+        help="Days after ignition before the search window begins. "
+             "Reduce for fires with debris flows in the first monsoon season.",
+    )
+    event_selection = st.selectbox(
+        "Event selection strategy",
+        ["first", "max_score", "max_precip"],
+        help="How to pick the reported event when multiple candidates are detected. "
+             "'first' = earliest chronologically, "
+             "'max_score' = largest spectral change, "
+             "'max_precip' = strongest precipitation.",
+    )
+
+    st.divider()
     st.subheader("Fire Selection")
     obs_user = st.text_input("Observer name (OBS_USER)", value="", help="Your name or initials for the OBS_USER field")
 
@@ -275,8 +294,8 @@ if st.button("Run Tool", type="primary", disabled=not ready, use_container_width
                 polygons_shp=poly_shp_path,
                 ign_date_str=ign_date_str,
                 gee_project=gee_project,
-                gee_credentials=gee_credentials or None,
-                detection_params=None,
+                gee_credentials=None,
+                detection_params={"post_fire_buffer_days": post_fire_buffer, "event_selection": event_selection},
                 sensor=sensor_key,
                 output_dir=output_dir,
                 log=ui_log,
@@ -340,8 +359,8 @@ if st.button("Run Tool", type="primary", disabled=not ready, use_container_width
                 fire_key=fire_key,
                 obs_date=obs_date_str,
                 gee_project=gee_project,
-                gee_credentials=gee_credentials or None,
-                detection_params=None,
+                gee_credentials=None,
+                detection_params={"post_fire_buffer_days": post_fire_buffer, "event_selection": event_selection},
                 sensor=sensor_key,
                 output_dir=output_dir,
                 log=ui_log,
