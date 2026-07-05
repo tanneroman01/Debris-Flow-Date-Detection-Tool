@@ -1,8 +1,12 @@
 """
-Debris Flow Detection Tool -- Streamlit Web App
+Debris Flow Detection Tool (SCAR v2) -- Streamlit Web App
 
 Provides a user-friendly interface to the full debris flow mapping pipeline:
 KML -> attribute addition -> GEE date detection -> merged output.
+
+v2 replaces the rule-based date detector with a gradient-boosted classifier
+on per-scene Sentinel-2 time series (see pipeline/time_detect.py). Sentinel-2
+only: fires ignited before mid-2015 are not supported.
 """
 
 import os
@@ -22,7 +26,7 @@ from pipeline import orchestrator
 
 # page configuration
 st.set_page_config(
-    page_title="Debris Flow Date Detection Tool",
+    page_title="SCAR v2",
     page_icon=":cloud_with_lightning_and_rain:",
     layout="wide",
     menu_items={
@@ -88,15 +92,19 @@ fire_db = load_fire_defaults()
 fire_keys = [k for k in fire_db.keys() if not k.startswith("_")] if fire_db else []
 
 # ── Header ──
-st.title("Debris Flow Date Detection Tool")
+st.title("SCAR v2: Satellite-based Classification of Alluvial Response")
 st.markdown("Do you know where post-fire debris flows occurred, but want to know when? " \
 "Upload your KML with mapped polygons for debris flow/landslide deposits, outlets, initiation points,"
 "or other features, as well as a fire boundary shapefile. Provide your Google Earth Enginge Project ID, "
-"and get back a fully attributed shapefile with detected event dates.")
+"and get back a fully attributed shapefile with detected event dates. "
+"v2 dates events with a gradient-boosted classifier on per-scene Sentinel-2 time series "
+"(3-5 day resolution). Sentinel-2 only: fires must have ignited after mid-2015.")
 sentiment_mapping = ["one", "two", "three", "four", "five"]
 selected = st.feedback("stars")
 if selected is not None:
     st.markdown(f"You selected {sentiment_mapping[selected]} stars.")
+    if selected in [0,1,2]:
+        st.markdown("Please select four or more stars!")
     
 
 # ── Sidebar: GEE project ID,  ──
@@ -110,31 +118,15 @@ with st.sidebar:
     )
 
     st.divider()
-    st.subheader("Imagery Source")
-    sensor_choice = st.radio(
-        "Satellite imagery for date detection",
-        ["Sentinel-2 (2015+)", "Landsat (2010+)"],
-        help="Use Landsat for fires before mid-2015 when Sentinel-2 imagery is not available",
-    )
-    sensor_key = "landsat" if "Landsat" in sensor_choice else "sentinel2"
-
-    st.divider()
     st.subheader("Detection Parameters")
     post_fire_buffer = st.number_input(
         "Post-fire buffer (days)",
         min_value=30,
         max_value=730,
         value=270,
-        help="Days after ignition before the search window begins. "
-             "Reduce for fires with debris flows in the first monsoon season.",
-    )
-    event_selection = st.selectbox(
-        "Event selection strategy",
-        ["first", "max_score", "max_precip"],
-        help="How to pick the reported event when multiple candidates are detected. "
-             "'first' = earliest chronologically, "
-             "'max_score' = largest spectral change, "
-             "'max_precip' = strongest precipitation.",
+        help="Days after ignition before the search window begins. Keeps the "
+             "burn itself out of the candidate scenes. Reduce for fires with "
+             "debris flows in the first monsoon season.",
     )
 
     st.divider()
@@ -295,8 +287,7 @@ if st.button("Run Tool", type="primary", disabled=not ready, use_container_width
                 ign_date_str=ign_date_str,
                 gee_project=gee_project,
                 gee_credentials=None,
-                detection_params={"post_fire_buffer_days": post_fire_buffer, "event_selection": event_selection},
-                sensor=sensor_key,
+                detection_params={"post_fire_buffer_days": post_fire_buffer},
                 output_dir=output_dir,
                 log=ui_log,
                 progress_callback=dd_progress_callback,
@@ -360,8 +351,7 @@ if st.button("Run Tool", type="primary", disabled=not ready, use_container_width
                 obs_date=obs_date_str,
                 gee_project=gee_project,
                 gee_credentials=None,
-                detection_params={"post_fire_buffer_days": post_fire_buffer, "event_selection": event_selection},
-                sensor=sensor_key,
+                detection_params={"post_fire_buffer_days": post_fire_buffer},
                 output_dir=output_dir,
                 log=ui_log,
                 progress_callback=fp_progress_callback,
@@ -407,6 +397,6 @@ if st.button("Run Tool", type="primary", disabled=not ready, use_container_width
 # ── Footer ──
 st.divider()
 st.caption(
-    "Debris Flow Date Detection Tool | CDOT Project | "
-    "Powered by Google Earth Engine, Sentinel-2, Sentinel-1, Landsat, Streamlit, OpenStreetMap, and more. Developed by Tanner Oman"
+    "Debris Flow Date Detection Tool v2 | CDOT Project | "
+    "Powered by Google Earth Engine, Sentinel-2, scikit-learn, Streamlit, OpenStreetMap, and more. Developed by Tanner Oman"
 )

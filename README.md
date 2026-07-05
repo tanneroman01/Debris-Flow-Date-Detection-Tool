@@ -1,8 +1,20 @@
-# Debris Flow Date Detection Tool
+# Debris Flow Date Detection Tool (SCAR v2)
 
-A Streamlit web app for detecting post-fire debris flow event dates from Sentinel-2 or Landsat satellite imagery via Google Earth Engine.
+A Streamlit web app for detecting post-fire debris flow event dates from Sentinel-2 satellite imagery via Google Earth Engine.
 
-See [docs/methodology.md](docs/methodology.md) for a full explanation of the process.
+v2 replaces the rule-based change detector with a **HistGradientBoosting classifier** applied to per-scene Sentinel-2 index time series (NDVI, NDRE, NBR, NDSI, RECI, B04, composite score). Each scene is scored with deseasonalized anomaly features (2-harmonic fit residuals, local level-shift statistics, day-of-year encoding); the scene with the highest event probability is the detected date. Working at the native 3-5 day revisit replaces the v1 30-day composite windows, so `DATE_START`/`DATE_END` narrow to the gap between consecutive clear scenes. The model is trained on known SW-USA debris flow event dates (see `tools/train_model.py`); a pre-trained model ships at `data/model/hgb_date_model.joblib`.
+
+**Sentinel-2 only**: fires ignited before mid-2015 are not supported — use the v1 app with the Landsat backend for those.
+
+See [docs/methodology.md](docs/methodology.md) for the v1 process; steps 1, 2 and 4 are unchanged in v2.
+
+## Retraining the model
+
+```bash
+python tools/train_model.py --csv <timeseries_all_polygons.csv>
+```
+
+The training CSV is produced by `Spectral_Separability_Analysis/pull_timeseries.py` from known-date polygons: one row per polygon-scene with all indices plus the known event window (`Before_Scn`/`After_Scn`). The script prints out-of-fold hit rates (GroupKFold grouped by event) before fitting the final model, so you can compare against the current model's `oof_metrics` (stored inside the artifact).
 
 ---
 
@@ -54,8 +66,7 @@ The app will open in your browser at this port: `http://localhost:8501`.
 | **GEE Credentials JSON** | Only required when using the hosted web app. Paste the contents of `~/.config/earthengine/credentials` (Windows: `C:\Users\<you>\.config\earthengine\credentials`). Leave blank when running locally. |
 | **KML file** | Exported from Google Earth with your mapped debris flow polygons. Polygons are recommended — points and linestrings will be buffered to 50m. |
 | **Fire boundary shapefile** | Upload all components (.shp, .shx, .dbf, .prj). Used to clip the road network for ROAD_REL attribution. |
-| **Fire** | Select from the built-in Colorado fire database (MTBS fires) or enter custom fire metadata manually. |
-| **Imagery Source** | Select from Sentinel-2 or Landsat, be mindful that Landsat has a more course native resultion (30m) than Sentinel (10m), if earliest search date (i.e., fire ignition date) is post-2015, go with Sentinel. |
+| **Fire** | Select from the built-in Colorado fire database (MTBS fires) or enter custom fire metadata manually. Ignition date must be after mid-2015 (Sentinel-2 era). |
 
 ### Output
 
@@ -69,11 +80,11 @@ A ZIP file containing a shapefile of centroid points with the following fields:
 | `IGN_DATE` | Fire ignition date |
 | `ROAD_REL` | Yes/No — feature within 100m of a road |
 | `DEPO_AREA` | Deposit area in m² (Deposit features only) |
-| `EVENT_DATE` | Detected debris flow date |
-| `DATE_START` | Start of detection interval |
-| `DATE_END` | End of detection interval |
-| `CONFIDENCE` | High / Medium / Low |
-| `CHG_SCORE` | Composite spectral change score |
+| `EVENT_DATE` | Detected debris flow date (first scene showing the anomaly) |
+| `DATE_START` | Last clear scene before the event |
+| `DATE_END` | First scene showing the anomaly (same as EVENT_DATE) |
+| `CONFIDENCE` | High / Medium / Low (binned model probability) |
+| `CHG_SCORE` | Model event probability (0-1) |
 | `LATITUDE` | Centroid latitude |
 | `LONGITUDE` | Centroid longitude |
 
@@ -81,6 +92,6 @@ A ZIP file containing a shapefile of centroid points with the following fields:
 
 ## Notes
 
-- Processing time is approximately 20–40 minutes for fires with ~50 polygons, depending on GEE server load.
-- Detection is limited to the active debris flow season (April–November) and skips snow-covered intervals (NDSI > 0.4).
-- A post-fire buffer of ~9 months is applied before searching for events, to avoid detecting the fire itself.
+- Scenes with more than 20% cloud/shadow cover over the polygon (Sentinel-2 SCL) or polygon-mean NDSI > 0.6 (snow) are dropped before scoring.
+- A post-fire buffer of ~9 months (adjustable in the sidebar) is applied before searching for events, to keep the burn itself out of the candidate scenes. Reduce it for fires with first-monsoon debris flows.
+- Polygons with fewer than 10 usable scenes are reported as undetected.

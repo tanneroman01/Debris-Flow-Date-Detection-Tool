@@ -1,0 +1,8 @@
+{
+    "_note": "Ignition dates for fires in known_dates_polygons.shp, keyed by 'FIRENAME|FIRE_YEAR'. Dates must be MM/DD/YYYY. Fire entries also present in dbflow_app/data/fire_defaults.json are picked up automatically -- this file only needs to cover the rest. Set a value to null or 'TODO' to skip that fire.",
+
+    "Twitchell Canyon|2010":  "07/20/2010",
+    "Buster Flats|2000":      "07/09/2000",
+    "Schultz|2010":           "06/20/2010",
+    "Springville|2002":       "07/14/2002"
+}
